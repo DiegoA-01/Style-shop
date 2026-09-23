@@ -1,0 +1,29 @@
+<div class="auth-page">
+  <form [formGroup]="form" (ngSubmit)="ingresar()" class="glass-card auth-card">
+    <h2>Iniciar sesión</h2>
+
+    @if (error()) {
+      <p class="glass-message error">{{ error() }}</p>
+    }
+
+    <label>
+      Usuario
+      <input type="text" formControlName="username" autocomplete="username">
+    </label>
+
+    <label>
+      Contraseña
+      <input type="password" formControlName="password" autocomplete="current-password">
+    </label>
+
+    <button type="submit" [disabled]="form.invalid || cargando()">
+      @if (cargando()) {
+        <span class="spinner" aria-hidden="true"></span> Ingresando...
+      } @else {
+        Ingresar
+      }
+    </button>
+
+    <p class="switch-link">¿No tienes cuenta? <a routerLink="/register">Regístrate</a></p>
+  </form>
+</div>

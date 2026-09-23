@@ -1,0 +1,33 @@
+@if (error()) {
+  <p class="glass-message error">{{ error() }}</p>
+}
+
+<form [formGroup]="form" (ngSubmit)="guardar()" class="glass-card form-card">
+  <label>
+    Nombre
+    <input type="text" formControlName="name">
+  </label>
+  @if (form.controls.name.invalid && form.controls.name.touched) {
+    <small class="error">El nombre debe tener al menos 2 caracteres.</small>
+  }
+
+  <label>
+    Descripción
+    <textarea formControlName="description" rows="2"></textarea>
+  </label>
+
+  <div class="card-actions">
+    <button type="submit" [disabled]="form.invalid || guardando()">
+      @if (guardando()) {
+        <span class="spinner" aria-hidden="true"></span> Guardando...
+      } @else {
+        Guardar
+      }
+    </button>
+    @if (embedded()) {
+      <button type="button" (click)="cerrar()">Cancelar</button>
+    } @else {
+      <a routerLink="/categories">Cancelar</a>
+    }
+  </div>
+</form>

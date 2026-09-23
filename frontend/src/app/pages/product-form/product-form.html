@@ -1,0 +1,77 @@
+@if (error()) {
+  <p class="glass-message error">{{ error() }}</p>
+}
+
+<form [formGroup]="form" (ngSubmit)="guardar()" class="glass-card form-card">
+
+  <label>
+    Imagen del producto
+    <div class="image-field">
+      @if (previewUrl()) {
+        <!-- La vista previa puede ser local (data URL) o la imagen ya guardada. -->
+        <img [src]="previewUrl()" alt="Vista previa" class="preview-image">
+      }
+      <div class="image-field-input">
+        <!-- Al cambiar el archivo se ejecutan la vista previa y la subida al backend. -->
+        <input type="file" accept="image/*" (change)="onFileSelected($event)">
+        @if (subiendoImagen()) {
+          <small class="hint"><span class="spinner" aria-hidden="true"></span> Subiendo imagen...</small>
+        }
+      </div>
+    </div>
+  </label>
+
+  <label>
+    Nombre
+    <input type="text" formControlName="name">
+  </label>
+  @if (form.controls.name.invalid && form.controls.name.touched) {
+    <small class="error">El nombre debe tener al menos 3 caracteres.</small>
+  }
+
+  <label>
+    Descripción
+    <textarea formControlName="description" rows="2"></textarea>
+  </label>
+
+  <label>
+    Precio (COP)
+    <div class="input-prefix">
+      <span>$</span>
+      <input type="number" step="0.001" min="0" formControlName="price">
+    </div>
+    @if (form.controls.price.value) {
+      <small class="hint">{{ form.controls.price.value | copCurrency }}</small>
+    }
+  </label>
+
+  <label>
+    Stock
+    <input type="number" formControlName="stock">
+  </label>
+
+  <label>
+    Categoría
+    <select formControlName="categoryId">
+      <option [ngValue]="null">-- Selecciona --</option>
+      @for (category of categories(); track category.id) {
+        <option [ngValue]="category.id">{{ category.name }}</option>
+      }
+    </select>
+  </label>
+
+  <div class="card-actions">
+    <button type="submit" [disabled]="form.invalid || subiendoImagen() || guardando()">
+      @if (guardando()) {
+        <span class="spinner" aria-hidden="true"></span> Guardando...
+      } @else {
+        Guardar
+      }
+    </button>
+    @if (embedded()) {
+      <button type="button" (click)="cerrar()">Cancelar</button>
+    } @else {
+      <a routerLink="/products">Cancelar</a>
+    }
+  </div>
+</form>

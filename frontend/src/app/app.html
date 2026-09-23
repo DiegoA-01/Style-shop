@@ -1,0 +1,29 @@
+<div class="page-background">
+  <div class="top-progress" [class.active]="loadingService.isLoading()" aria-hidden="true"></div>
+
+  <header class="glass-nav">
+    <h1>
+      <svg class="brand-logo" viewBox="0 0 100 100" role="img" aria-label="Logo Style Shop">
+        <circle cx="50" cy="50" r="42" fill="#ffffff" stroke="#111111" stroke-width="4"/>
+        <text x="50" y="50" text-anchor="middle" dy="0.35em" font-family="Inter, system-ui, sans-serif" font-weight="800" font-size="36" fill="#111111">DP</text>
+      </svg>
+      Style Shop
+    </h1>
+    <nav>
+      @if (authService.isLoggedIn()) {
+        <a routerLink="/products" routerLinkActive="activo">Productos</a>
+        <a routerLink="/categories" routerLinkActive="activo">Categorías</a>
+        <button type="button" class="nav-logout" (click)="cerrarSesion()">Cerrar sesión</button>
+      } @else {
+        <a routerLink="/login" routerLinkActive="activo">Iniciar sesión</a>
+        <a routerLink="/register" routerLinkActive="activo">Registrarse</a>
+      }
+    </nav>
+  </header>
+
+  <main>
+    <router-outlet />
+  </main>
+
+  <app-toast-container />
+</div>

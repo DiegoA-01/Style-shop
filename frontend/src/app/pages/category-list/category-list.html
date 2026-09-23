@@ -1,0 +1,66 @@
+@if (cargando()) {
+  <p class="glass-message">Cargando categorías...</p>
+} @else if (error()) {
+  <p class="glass-message error">{{ error() }}</p>
+} @else {
+  <div class="category-grid">
+    @for (category of categories(); track category.id) {
+      <div
+        class="glass-card category-card"
+        role="button"
+        tabindex="0"
+        [attr.aria-label]="'Ver productos de ' + category.name"
+        (click)="verProductos(category)"
+        (keydown.enter)="verProductos(category)"
+      >
+        <!-- La utilidad transforma el nombre de la categoría en /images/categories/*.jpg. -->
+        <img
+          [src]="getCategoryImage(category.name)"
+          (error)="onImageError($event)"
+          [alt]="category.name"
+          class="category-image"
+        >
+        <div class="card-content">
+          <h3>{{ category.name }}</h3>
+          @if (category.description) {
+            <p>{{ category.description }}</p>
+          }
+          <div class="card-actions" (click)="$event.stopPropagation()">
+            <a [routerLink]="['/categories', category.id, 'edit']">Editar</a>
+            <button (click)="eliminar(category.id)">Eliminar</button>
+          </div>
+        </div>
+      </div>
+    } @empty {
+      <p class="glass-message">No hay categorías todavía.</p>
+    }
+  </div>
+}
+
+<button type="button" class="glass-button" (click)="abrirFormulario()">+ Nueva categoría</button>
+
+@if (mostrarFormulario()) {
+  <div class="form-modal-backdrop" (click)="cerrarFormulario()">
+    <section class="form-modal" role="dialog" aria-modal="true" aria-labelledby="new-category-title" (click)="$event.stopPropagation()">
+      <div class="form-modal-header">
+        <h2 id="new-category-title">Nueva categoría</h2>
+        <button type="button" class="close-modal" aria-label="Cerrar" (click)="cerrarFormulario()">&times;</button>
+      </div>
+      <app-category-form [embedded]="true" (saved)="categoriaGuardada()" (closed)="cerrarFormulario()" />
+    </section>
+  </div>
+}
+
+@if (categoriaAEliminar() !== null) {
+  <div class="delete-modal-backdrop" (click)="cancelarEliminacion()">
+    <section class="delete-modal" role="alertdialog" aria-modal="true" aria-labelledby="delete-category-title" (click)="$event.stopPropagation()">
+      <div class="delete-modal-icon">!</div>
+      <h2 id="delete-category-title">¿Eliminar categoría?</h2>
+      <p>Esta acción no se puede deshacer.</p>
+      <div class="delete-modal-actions">
+        <button type="button" class="cancel-delete" (click)="cancelarEliminacion()">Cancelar</button>
+        <button type="button" class="confirm-delete" (click)="confirmarEliminacion()">Eliminar</button>
+      </div>
+    </section>
+  </div>
+}

@@ -1,0 +1,69 @@
+@if (categoryId()) {
+  <div class="filter-bar">
+    <span>Categoría: <strong>{{ categoryName() }}</strong></span>
+    <a routerLink="/products" class="clear-filter">Ver todos los productos</a>
+  </div>
+}
+
+@if (cargando()) {
+  <p class="glass-message">Cargando productos...</p>
+} @else if (error()) {
+  <p class="glass-message error">{{ error() }}</p>
+} @else {
+  <div class="product-grid">
+    @for (product of productosFiltrados(); track product.id) {
+      <div class="glass-card">
+        <!-- Primero se usa la imagen propia del producto; si no existe, se usa la de su categoría. -->
+        <img
+          [src]="product.imageUrl || getCategoryImage(product.category.name)"
+          (error)="onImageError($event, product.category.name)"
+          [alt]="product.name"
+          class="product-image"
+        >
+        <div class="card-content">
+          <h3>{{ product.name }}</h3>
+          <span class="category-tag">{{ product.category.name }}</span>
+          <p class="price">{{ product.price | copCurrency }}</p>
+          <p class="stock">Stock: {{ product.stock }}</p>
+          <div class="card-actions">
+            <a [routerLink]="['/products', product.id, 'edit']">Editar</a>
+            <button (click)="eliminar(product.id)">Eliminar</button>
+          </div>
+        </div>
+      </div>
+    } @empty {
+      @if (categoryId()) {
+        <p class="glass-message">No hay productos en esta categoría todavía.</p>
+      } @else {
+        <p class="glass-message">No hay productos todavía.</p>
+      }
+    }
+  </div>
+}
+<button type="button" class="glass-button" (click)="abrirFormulario()">+ Nuevo producto</button>
+
+@if (mostrarFormulario()) {
+  <div class="form-modal-backdrop" (click)="cerrarFormulario()">
+    <section class="form-modal" role="dialog" aria-modal="true" aria-labelledby="new-product-title" (click)="$event.stopPropagation()">
+      <div class="form-modal-header">
+        <h2 id="new-product-title">Nuevo producto</h2>
+        <button type="button" class="close-modal" aria-label="Cerrar" (click)="cerrarFormulario()">&times;</button>
+      </div>
+      <app-product-form [embedded]="true" (saved)="productoGuardado()" (closed)="cerrarFormulario()" />
+    </section>
+  </div>
+}
+
+@if (productoAEliminar() !== null) {
+  <div class="delete-modal-backdrop" (click)="cancelarEliminacion()">
+    <section class="delete-modal" role="alertdialog" aria-modal="true" aria-labelledby="delete-product-title" (click)="$event.stopPropagation()">
+      <div class="delete-modal-icon">!</div>
+      <h2 id="delete-product-title">¿Eliminar producto?</h2>
+      <p>Esta acción no se puede deshacer.</p>
+      <div class="delete-modal-actions">
+        <button type="button" class="cancel-delete" (click)="cancelarEliminacion()">Cancelar</button>
+        <button type="button" class="confirm-delete" (click)="confirmarEliminacion()">Eliminar</button>
+      </div>
+    </section>
+  </div>
+}

@@ -1,0 +1,110 @@
+.form-card {
+  width: min(100%, 440px);
+  margin: 0 auto;
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+  box-sizing: border-box;
+  color: var(--color-text);
+  animation: pop-in var(--duration) var(--ease);
+}
+
+.form-card label {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+.form-card input,
+.form-card textarea,
+.form-card select {
+  width: 100%;
+  font-weight: 500;
+  padding: 0.6rem 0.8rem;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--color-border);
+  background: rgba(255, 255, 255, 0.92);
+  color: #1a1a1a;
+  font: inherit;
+  font-size: 0.9rem;
+  transition: border-color var(--duration-fast) var(--ease);
+}
+
+.form-card textarea {
+  min-height: 60px;
+  resize: vertical;
+}
+
+.form-card input:focus,
+.form-card textarea:focus,
+.form-card select:focus {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 1px;
+  border-color: var(--color-accent);
+}
+
+.card-actions {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 1rem;
+  margin-top: 0.5rem;
+}
+
+.card-actions button,
+.card-actions a {
+  padding: 0.75rem 1.25rem;
+  border-radius: var(--radius-sm);
+  font: inherit;
+  font-weight: 600;
+  text-decoration: none;
+  transition: transform var(--duration-fast) var(--ease), opacity var(--duration-fast) var(--ease);
+}
+
+.card-actions button {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  border: 1px solid var(--color-accent);
+  background: var(--color-accent);
+  color: #06201d;
+  cursor: pointer;
+}
+
+.card-actions button:hover:not(:disabled) {
+  transform: translateY(-1px);
+}
+
+.card-actions button:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.card-actions a {
+  border: 1px solid var(--color-border);
+  color: var(--color-text);
+}
+
+.error {
+  color: #ffb4a8;
+}
+
+@media (max-width: 600px) {
+  .form-card {
+    margin: 1rem auto;
+    padding: 1.25rem;
+  }
+
+  .card-actions {
+    justify-content: stretch;
+  }
+
+  .card-actions button,
+  .card-actions a {
+    flex: 1;
+    text-align: center;
+  }
+}
