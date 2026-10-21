@@ -1,0 +1,422 @@
+<div class="panel">
+  <!-- ── Encabezado con la seda del home ── -->
+  <header class="hero-band" appReveal>
+    <div class="hb-copy">
+      <p class="mono-label">Panel · Super admin · {{ hoyDate | date: "EEEE d 'de' MMMM" }}</p>
+      <h2 class="display">{{ saludo() }}</h2>
+      @if (daily(); as d) {
+        <p class="lede">
+          @if (esHoy() && d.salesCount > 0) {
+            Hoy llevas <strong>{{ d.total | copCurrency }}</strong> en {{ d.salesCount }} {{ d.salesCount === 1 ? 'venta' : 'ventas' }}.
+          } @else if (esHoy()) {
+            Todavía no hay ventas cobradas hoy. En el mes llevas <strong>{{ d.monthTotal | copCurrency }}</strong>.
+          } @else {
+            Estás viendo el {{ fechaDate() | date: "d 'de' MMMM" }}.
+          }
+          @if (pedidosPorEstado().PENDIENTE > 0) {
+            Hay <strong>{{ pedidosPorEstado().PENDIENTE }} {{ pedidosPorEstado().PENDIENTE === 1 ? 'pedido pendiente' : 'pedidos pendientes' }}</strong> por cobrar.
+          }
+        </p>
+      }
+    </div>
+    <app-silk-ribbon class="hb-silk" [pose]="0.3" />
+  </header>
+
+  <!-- ── Secciones: la barra queda fija bajo el menú y marca dónde estás ── -->
+  <nav class="sec-nav" aria-label="Secciones del panel">
+    <div class="sec-links">
+      @for (s of secciones; track s.id) {
+        <a [href]="'#' + s.id" [class.on]="seccionActiva() === s.id" [attr.aria-current]="seccionActiva() === s.id ? 'true' : null" (click)="irA(s.id, $event)">{{ s.label }}</a>
+      }
+    </div>
+    <button type="button" class="btn small" (click)="mostrarFormulario.set(true)">Nuevo trabajador</button>
+  </nav>
+
+  @if (error()) {
+    <p class="lux-state error" role="alert">{{ error() }}</p>
+  }
+
+  <!-- ══════════ RESUMEN ══════════ -->
+  <section id="resumen" class="block" tabindex="-1" aria-labelledby="t-resumen">
+    <h3 id="t-resumen" class="sr-only">Resumen</h3>
+
+    @if (daily(); as d) {
+      <div class="stats" [class.loading]="cargandoDia()">
+        <div class="stat hero-stat" appReveal style="--i: 0">
+          <p class="stat-label">Vendido {{ nombreDia() === 'ese día' ? 'el ' + (fechaDate() | date: "d 'de' MMMM") : nombreDia() }}</p>
+          <p class="hero-value" [appCountUp]="d.total" [countFormat]="moneda">{{ d.total | copCurrency }}</p>
+          <div class="hero-foot">
+            <span class="stat-sub">{{ d.salesCount }} {{ d.salesCount === 1 ? 'venta' : 'ventas' }} · {{ d.unitsSold }} {{ d.unitsSold === 1 ? 'unidad' : 'unidades' }}</span>
+            @if (delta(); as dt) {
+              <span class="delta" [class.up]="dt.sube" [class.down]="!dt.sube">
+                <svg viewBox="0 0 12 12" aria-hidden="true"><path [attr.d]="dt.sube ? 'M6 2 L10 8 H2 Z' : 'M6 10 L10 4 H2 Z'" /></svg>
+                @if (dt.pct !== null) {
+                  {{ dt.pct > 0 ? '+' : '' }}{{ dt.pct }}% frente al día anterior
+                } @else {
+                  El día anterior no hubo ventas
+                }
+              </span>
+            }
+          </div>
+          <span class="stat-line" aria-hidden="true"></span>
+        </div>
+        <div class="stat" appReveal style="--i: 1">
+          <p class="stat-label">Ticket promedio</p>
+          <p class="stat-value" [appCountUp]="d.averageTicket" [countFormat]="moneda">{{ d.averageTicket | copCurrency }}</p>
+          <p class="stat-sub">Lo que gasta cada cliente</p>
+        </div>
+        <div class="stat" appReveal style="--i: 2">
+          <p class="stat-label">En lo que va del mes</p>
+          <p class="stat-value" [appCountUp]="d.monthTotal" [countFormat]="moneda">{{ d.monthTotal | copCurrency }}</p>
+          <p class="stat-sub">{{ fechaDate() | date: 'MMMM' }}</p>
+        </div>
+        <div class="stat" appReveal style="--i: 3">
+          <p class="stat-label">En lo que va del año</p>
+          <p class="stat-value" [appCountUp]="d.yearTotal" [countFormat]="moneda">{{ d.yearTotal | copCurrency }}</p>
+          <p class="stat-sub">{{ fechaDate() | date: 'y' }}</p>
+        </div>
+      </div>
+    } @else if (cargandoDia()) {
+      <div class="stats skeleton" aria-busy="true" aria-label="Cargando las cifras">
+        @for (n of [0, 1, 2, 3]; track n) {
+          <div class="stat" [class.hero-stat]="n === 0"><span class="bar short"></span><span class="bar"></span></div>
+        }
+      </div>
+    }
+
+    <!-- Accesos rápidos a lo que más se hace desde el panel -->
+    <div class="quick">
+      <button type="button" class="q-card" appReveal style="--i: 0" (click)="mostrarFormulario.set(true)">
+        <svg viewBox="0 0 32 32" aria-hidden="true"><circle cx="13" cy="11" r="5" /><path d="M4 27c0-5 4-8 9-8s9 3 9 8" /><path d="M25 9v8M21 13h8" /></svg>
+        <span class="q-title">Nuevo trabajador</span>
+        <span class="q-hint">Empleado, cajero o super admin</span>
+      </button>
+      <a class="q-card" appReveal style="--i: 1" routerLink="/products/new">
+        <svg viewBox="0 0 32 32" aria-hidden="true"><path d="M8 11h16l-1.5 16h-13Z" /><path d="M12 11V9a4 4 0 0 1 8 0v2" /><path d="M16 16v6M13 19h6" /></svg>
+        <span class="q-title">Nuevo producto</span>
+        <span class="q-hint">Foto, precio y stock</span>
+      </a>
+      <a class="q-card" appReveal style="--i: 2" routerLink="/orders">
+        <svg viewBox="0 0 32 32" aria-hidden="true"><rect x="7" y="5" width="18" height="22" rx="2" /><path d="M11 11h10M11 16h10M11 21h6" /></svg>
+        <span class="q-title">Pedidos</span>
+        <span class="q-hint">
+          @if (pedidosPorEstado().PENDIENTE > 0) {
+            {{ pedidosPorEstado().PENDIENTE }} por cobrar
+          } @else {
+            Todo el historial
+          }
+        </span>
+      </a>
+      <a class="q-card" appReveal style="--i: 3" routerLink="/categories">
+        <svg viewBox="0 0 32 32" aria-hidden="true"><rect x="5" y="5" width="9" height="9" rx="1.5" /><rect x="18" y="5" width="9" height="9" rx="1.5" /><rect x="5" y="18" width="9" height="9" rx="1.5" /><rect x="18" y="18" width="9" height="9" rx="1.5" /></svg>
+        <span class="q-title">Categorías</span>
+        <span class="q-hint">Organiza el catálogo</span>
+      </a>
+    </div>
+  </section>
+
+  <!-- ══════════ EL DÍA ══════════ -->
+  <section id="dia" class="block" tabindex="-1" aria-labelledby="t-dia">
+    <header class="block-head" appReveal>
+      <div>
+        <p class="mono-label">Ventas y pedidos</p>
+        <h3 id="t-dia" class="block-title">El día</h3>
+      </div>
+      <!-- Moverse entre días: flechas, Hoy o el calendario -->
+      <div class="stepper" role="group" aria-label="Elegir día">
+        <button type="button" class="step" aria-label="Día anterior" (click)="moverDia(-1)">
+          <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M10 3 5 8l5 5" /></svg>
+        </button>
+        <label class="date">
+          <span class="sr-only">Elegir otro día</span>
+          <input type="date" [value]="fecha()" [max]="hoy" (change)="cambiarFecha($any($event.target).value)">
+        </label>
+        <button type="button" class="step" aria-label="Día siguiente" [disabled]="esHoy()" (click)="moverDia(1)">
+          <svg viewBox="0 0 16 16" aria-hidden="true"><path d="m6 3 5 5-5 5" /></svg>
+        </button>
+        <button type="button" class="chip" [class.on]="esHoy()" (click)="cambiarFecha(hoy)">Hoy</button>
+      </div>
+    </header>
+
+    @if (daily(); as d) {
+      <div class="two-col">
+        <!-- Lo vendido, producto por producto -->
+        <article class="card" [class.loading]="cargandoDia()" appReveal style="--i: 0">
+          <header class="card-head">
+            <div>
+              <p class="mono-label">Detalle · {{ d.lines.length }} {{ d.lines.length === 1 ? 'línea' : 'líneas' }}</p>
+              <h4 class="card-title">Lo vendido {{ nombreDia() }}</h4>
+            </div>
+          </header>
+          @if (d.lines.length) {
+            <div class="table-wrap">
+              <table class="data">
+                <thead>
+                  <tr>
+                    <th scope="col">Hora</th>
+                    <th scope="col">Producto</th>
+                    <th scope="col" class="num">Precio</th>
+                    <th scope="col" class="num">Cant.</th>
+                    <th scope="col" class="num">Subtotal</th>
+                    <th scope="col">Canal · Pago</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @for (line of d.lines; track $index; let i = $index) {
+                    <tr [style.--r]="i">
+                      <td class="mono">{{ line.paidAt | date: 'HH:mm' }}</td>
+                      <th scope="row">{{ line.productName }}</th>
+                      <td class="num">{{ line.unitPrice | copCurrency }}</td>
+                      <td class="num">{{ line.quantity }}</td>
+                      <td class="num strong">{{ line.subtotal | copCurrency }}</td>
+                      <td class="muted">{{ canalLabel(line.channel) }} · {{ pagoLabel(line.paymentMethod) }}</td>
+                    </tr>
+                  }
+                </tbody>
+                <tfoot>
+                  <tr>
+                    <th scope="row" colspan="4">Total</th>
+                    <td class="num strong">{{ d.total | copCurrency }}</td>
+                    <td></td>
+                  </tr>
+                </tfoot>
+              </table>
+            </div>
+          } @else {
+            <div class="empty">
+              <svg viewBox="0 0 48 48" aria-hidden="true"><path class="empty-draw" pathLength="1" d="M10 18h28l-3 22H13Z" /><path class="empty-draw" pathLength="1" d="M18 18v-3a6 6 0 0 1 12 0v3" /></svg>
+              <p>Todavía no hay ventas cobradas {{ nombreDia() }}.</p>
+            </div>
+          }
+        </article>
+
+        <!-- Pedidos del día: pendientes primero -->
+        <article class="card" [class.loading]="cargandoDia()" appReveal style="--i: 1">
+          <header class="card-head">
+            <div>
+              <p class="mono-label">Pedidos · {{ d.orders.length }}</p>
+              <h4 class="card-title">Pedidos {{ nombreDia() === 'ese día' ? 'de ese día' : 'de ' + nombreDia() }}</h4>
+            </div>
+            <a class="link-mono" routerLink="/orders">Ver todos</a>
+          </header>
+          @if (d.orders.length) {
+            <p class="status-summary">
+              <span class="status" data-status="PENDIENTE">{{ pedidosPorEstado().PENDIENTE }} pendientes</span>
+              <span class="status" data-status="PAGADA">{{ pedidosPorEstado().PAGADA }} pagados</span>
+              <span class="status" data-status="ANULADA">{{ pedidosPorEstado().ANULADA }} anulados</span>
+            </p>
+            <ul class="orders">
+              @for (order of pedidosOrdenados(); track order.id; let i = $index) {
+                <li [style.--r]="i" [class.pending]="order.status === 'PENDIENTE'">
+                  <div class="order-main">
+                    <span class="mono">#{{ order.id }} · {{ order.createdAt | date: 'HH:mm' }} · {{ canalLabel(order.channel) }}</span>
+                    <strong>{{ order.customerName }}</strong>
+                    <span class="muted">{{ order.items.length }} {{ order.items.length === 1 ? 'producto' : 'productos' }}</span>
+                  </div>
+                  <div class="order-side">
+                    <span class="num strong">{{ order.total | copCurrency }}</span>
+                    <span class="status" [attr.data-status]="order.status">{{ estadoLabel(order.status) }}</span>
+                  </div>
+                </li>
+              }
+            </ul>
+          } @else {
+            <div class="empty">
+              <svg viewBox="0 0 48 48" aria-hidden="true"><rect class="empty-draw" pathLength="1" x="12" y="8" width="24" height="32" rx="3" /><path class="empty-draw" pathLength="1" d="M18 17h12M18 24h12M18 31h7" /></svg>
+              <p>No entraron pedidos {{ nombreDia() }}.</p>
+            </div>
+          }
+        </article>
+      </div>
+    }
+  </section>
+
+  <!-- ══════════ TENDENCIA ══════════ -->
+  <section id="tendencia" class="block" tabindex="-1" aria-labelledby="t-tendencia">
+    <header class="block-head" appReveal>
+      <div>
+        <p class="mono-label">Ventas cobradas</p>
+        <h3 id="t-tendencia" class="block-title">Tendencia</h3>
+      </div>
+      <label class="year">
+        <span class="mono-label">Año</span>
+        <select [value]="anio()" (change)="cambiarAnio($any($event.target).value)">
+          @for (y of aniosDisponibles(); track y) {
+            <option [value]="y" [selected]="y === anio()">{{ y }}</option>
+          }
+        </select>
+      </label>
+    </header>
+
+    <article class="card wide" appReveal>
+      <header class="card-head">
+        <div>
+          <p class="mono-label">{{ anio() }}</p>
+          <h4 class="card-title">Mes a mes</h4>
+        </div>
+        @if (monthly(); as m) {
+          <div class="card-figure">
+            <span class="stat-label">Total del año</span>
+            <strong [appCountUp]="m.yearTotal" [countFormat]="moneda">{{ m.yearTotal | copCurrency }}</strong>
+          </div>
+        }
+      </header>
+      @if (monthly()) {
+        <app-bar-chart [items]="mesesChart()" [format]="moneda" [measure]="'Vendido por mes en ' + anio()" />
+        <p class="chart-note">
+          @if (mejorMes(); as mejor) {
+            El mes más fuerte fue <strong>{{ mejor.nombre }}</strong>, con el {{ mejor.share }}% de lo vendido en el año.
+            Pasa el cursor por cada barra para ver su porcentaje y cuánto cambió frente al mes anterior.
+          } @else {
+            Todavía no hay ventas cobradas en {{ anio() }}.
+          }
+        </p>
+      } @else {
+        <p class="lux-state">Cargando la gráfica…</p>
+      }
+    </article>
+
+    <div class="two-col">
+      <article class="card" appReveal style="--i: 0">
+        <header class="card-head">
+          <div>
+            <p class="mono-label">Año a año</p>
+            <h4 class="card-title">Cómo va cada año</h4>
+          </div>
+        </header>
+        @if (yearly(); as years) {
+          @if (years.length >= 2) {
+            <app-bar-chart [items]="aniosChart()" [format]="moneda" measure="Vendido por año" />
+          } @else if (years.length === 1) {
+            <!-- Con un solo año, una barra sola no compara nada: se muestra la cifra. -->
+            <div class="single-year">
+              <p class="stat-label">{{ years[0].year }}</p>
+              <p class="hero-value" [appCountUp]="years[0].total" [countFormat]="moneda">{{ years[0].total | copCurrency }}</p>
+              <p class="stat-sub">La comparación entre años aparece cuando haya un segundo año de ventas.</p>
+            </div>
+          } @else {
+            <p class="empty-text">Todavía no hay ventas cobradas.</p>
+          }
+        }
+        @if (resumenAnio(); as ra) {
+          <dl class="year-facts">
+            <div>
+              <dt>Ventas en {{ anio() }}</dt>
+              <dd [appCountUp]="ra.ventas" [countFormat]="entero">{{ ra.ventas }}</dd>
+            </div>
+            <div>
+              <dt>Ticket promedio</dt>
+              <dd [appCountUp]="ra.ticket" [countFormat]="moneda">{{ ra.ticket | copCurrency }}</dd>
+            </div>
+            <div>
+              <dt>Mejor mes</dt>
+              <dd>{{ mejorMes()?.nombre ?? 'Sin ventas' }}</dd>
+            </div>
+            <div>
+              <dt>Meses con ventas</dt>
+              <dd>{{ ra.mesesConVentas }} de 12</dd>
+            </div>
+          </dl>
+        }
+      </article>
+
+      <article class="card" appReveal style="--i: 1">
+        <header class="card-head">
+          <div>
+            <p class="mono-label">Productos · {{ anio() }}</p>
+            <h4 class="card-title">Lo que más y menos se vende</h4>
+          </div>
+        </header>
+        @if (ranking(); as r) {
+          <div class="extremes">
+            <div class="extreme best">
+              <p class="stat-label">Más vendido</p>
+              @if (r.best) {
+                <p class="extreme-name">{{ r.best.productName }}</p>
+                <p class="stat-sub">{{ r.best.unitsSold }} unidades · {{ r.best.revenue | copCurrency }}</p>
+              } @else {
+                <p class="stat-sub">Sin ventas todavía.</p>
+              }
+            </div>
+            <div class="extreme worst">
+              <p class="stat-label">Menos vendido</p>
+              @if (r.worst) {
+                <p class="extreme-name">{{ r.worst.productName }}</p>
+                <p class="stat-sub">{{ r.worst.unitsSold }} {{ r.worst.unitsSold === 1 ? 'unidad' : 'unidades' }} · {{ r.worst.revenue | copCurrency }}</p>
+              } @else {
+                <p class="stat-sub">No hay productos en el catálogo.</p>
+              }
+            </div>
+          </div>
+          @if (r.products.length && r.best) {
+            <ol class="ranking">
+              @for (p of r.products; track p.productName; let i = $index) {
+                <li [style.--r]="i">
+                  <span class="mono">{{ (i + 1).toString().padStart(2, '0') }}</span>
+                  <span class="rank-name">{{ p.productName }}</span>
+                  <!-- Barra de proporción frente al más vendido -->
+                  <span class="rank-meter" aria-hidden="true"><span [style.--w]="p.unitsSold / r.best.unitsSold"></span></span>
+                  <span class="num muted">{{ p.unitsSold }} u.</span>
+                  <span class="num">{{ p.revenue | copCurrency }}</span>
+                </li>
+              }
+            </ol>
+          }
+        }
+      </article>
+    </div>
+  </section>
+
+  <!-- ══════════ EQUIPO ══════════ -->
+  <section id="equipo" class="block" tabindex="-1" aria-labelledby="t-equipo">
+    <header class="block-head" appReveal>
+      <div>
+        <p class="mono-label">Cuentas</p>
+        <h3 id="t-equipo" class="block-title">Equipo</h3>
+      </div>
+      <a class="btn-line" routerLink="/users">Ver equipo</a>
+    </header>
+
+    <div class="team" appReveal>
+      <div class="team-cell">
+        <span class="role-dot" data-role="TRABAJADOR" aria-hidden="true"></span>
+        <p class="team-num" [appCountUp]="equipo().empleados" [countFormat]="entero">{{ equipo().empleados }}</p>
+        <p class="stat-label">Empleados</p>
+        <p class="stat-sub">Catálogo e imágenes</p>
+      </div>
+      <div class="team-cell">
+        <span class="role-dot" data-role="CAJERO" aria-hidden="true"></span>
+        <p class="team-num" [appCountUp]="equipo().cajeros" [countFormat]="entero">{{ equipo().cajeros }}</p>
+        <p class="stat-label">Cajeros</p>
+        <p class="stat-sub">Cobros y mostrador</p>
+      </div>
+      <div class="team-cell">
+        <span class="role-dot" data-role="SUPER_ADMIN" aria-hidden="true"></span>
+        <p class="team-num" [appCountUp]="equipo().admins" [countFormat]="entero">{{ equipo().admins }}</p>
+        <p class="stat-label">Super admins</p>
+        <p class="stat-sub">Acceso total</p>
+      </div>
+      <div class="team-cell">
+        <span class="role-dot" data-role="USUARIO" aria-hidden="true"></span>
+        <p class="team-num" [appCountUp]="equipo().clientes" [countFormat]="entero">{{ equipo().clientes }}</p>
+        <p class="stat-label">Clientes</p>
+        <p class="stat-sub">Se registran solos en la tienda</p>
+      </div>
+    </div>
+  </section>
+</div>
+
+@if (mostrarFormulario()) {
+  <div class="lux-backdrop" (click)="mostrarFormulario.set(false)">
+    <section class="lux-panel" role="dialog" aria-modal="true" aria-labelledby="new-worker-title" (click)="$event.stopPropagation()">
+      <div class="lux-panel-head">
+        <div>
+          <p class="mono-label">Equipo</p>
+          <h2 id="new-worker-title" class="display">Nuevo trabajador</h2>
+        </div>
+        <button type="button" class="lux-close" aria-label="Cerrar" (click)="mostrarFormulario.set(false)">&times;</button>
+      </div>
+      <app-user-form (saved)="trabajadorCreado()" (closed)="mostrarFormulario.set(false)" />
+    </section>
+  </div>
+}

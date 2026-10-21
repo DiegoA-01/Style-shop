@@ -10,44 +10,45 @@
 
 .page-background {
   position: relative;
-  /* Contiene el ::before (que usa z-index negativo) dentro de este elemento,
-     así queda siempre detrás del contenido sin importar su posición. */
+  /* Contiene los pseudo-elementos (z-index negativo) dentro de este elemento,
+     así quedan siempre detrás del contenido sin importar su posición. */
   isolation: isolate;
   width: 100%;
   min-height: 100vh;
+  /* clip (y no solo hidden) para no romper position: sticky del nav y la portada. */
   overflow: hidden;
+  overflow: clip;
 }
 
+/* Capa de ambiente, la misma en toda la app: grafito con dos luces que se
+   mueven muy despacio, más un grano fino encima. */
 .page-background::before {
   content: '';
   position: fixed;
-  /* Un poco más grande que la pantalla para que el zoom/paneo de la
-     animación nunca deje ver un borde. */
-  inset: -6%;
-  z-index: -1;
-
-  /* Degradado oscuro sobre la foto para que el vidrio esmerilado resalte
-     y el texto blanco del nav/tarjetas siempre tenga contraste. */
-  background-image:
-    radial-gradient(circle at top, rgba(0, 0, 0, 0) 0%, rgba(6, 8, 14, 0.55) 75%),
-    linear-gradient(180deg, rgba(8, 10, 16, 0.72) 0%, rgba(8, 10, 16, 0.88) 100%),
-    url('/images/hero-bg4.jpg');
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
-
-  /* Movimiento sutil tipo "Ken Burns": zoom y paneo lentísimos en bucle. */
-  animation: bg-drift 26s ease-in-out infinite alternate;
-  will-change: transform;
+  inset: -20%;
+  z-index: -2;
+  background:
+    radial-gradient(40% 35% at 25% 20%, rgba(229, 56, 59, 0.11), transparent 70%),
+    radial-gradient(45% 40% at 78% 72%, rgba(196, 196, 200, 0.05), transparent 70%),
+    radial-gradient(35% 30% at 60% 110%, rgba(140, 16, 26, 0.14), transparent 70%),
+    var(--canvas);
+  animation: ambient-drift 70s ease-in-out -20s infinite alternate;
+  pointer-events: none;
 }
 
-@keyframes bg-drift {
-  0% {
-    transform: scale(1) translate(0, 0);
-  }
-  100% {
-    transform: scale(1.08) translate(-1.5%, -1%);
-  }
+.page-background::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  opacity: 0.07;
+  pointer-events: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+@keyframes ambient-drift {
+  from { transform: translate(0, 0) scale(1); }
+  to { transform: translate(-6%, 4%) scale(1.08); }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -56,106 +57,192 @@
   }
 }
 
-/* ── El efecto "liquid glass" ── */
-.glass-nav {
+/* ── Menú: pastilla de vidrio flotante ── */
+.nav-wrap {
   position: sticky;
-  top: 0;
+  top: calc(env(safe-area-inset-top, 0px) + 14px);
   z-index: 20;
-
-  /* Fondo semi-transparente, deja ver la imagen de atrás */
-  background: linear-gradient(
-    120deg,
-    rgba(255, 255, 255, 0.16),
-    rgba(255, 255, 255, 0.08)
-  );
-
-  /* El corazón del efecto: desenfoca lo que hay DETRÁS del elemento */
-  backdrop-filter: blur(20px) saturate(180%);
-  -webkit-backdrop-filter: blur(20px) saturate(180%);
-
-  /* Borde sutil, típico del vidrio esmerilado */
-  border: 1px solid rgba(255, 255, 255, 0.3);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.18);
-  border-radius: 0 0 24px 24px;
-
-  /* Sombra suave para dar profundidad, como si "flotara" */
-  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.35);
-
-  padding: 1.5rem 3rem;
   display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 1.5rem;
+  justify-content: center;
+  margin: 14px clamp(0.75rem, 3vw, 2rem) 0;
 }
 
-.glass-nav h1 {
+/* Banda que se desvanece bajo el menú: lo que pasa por debajo al hacer scroll
+   se difumina en vez de verse cortado junto a la pastilla. */
+.nav-wrap::before {
+  content: "";
+  position: fixed;
+  inset: 0 0 auto;
+  z-index: -1;
+  height: calc(env(safe-area-inset-top, 0px) + 96px);
+  background: linear-gradient(180deg, rgba(11, 11, 12, 0.92) 40%, rgba(11, 11, 12, 0));
+  -webkit-backdrop-filter: blur(6px);
+  backdrop-filter: blur(6px);
+  -webkit-mask-image: linear-gradient(180deg, #000 55%, transparent);
+  mask-image: linear-gradient(180deg, #000 55%, transparent);
+  pointer-events: none;
+}
+
+.glass-nav {
   display: flex;
   align-items: center;
   gap: 0.6rem;
-  color: #fff;
-  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.45);
-  margin: 0;
-  font-size: 1.85rem;
-  letter-spacing: 0.02em;
+  max-width: 100%;
+  padding: 0.4rem 0.45rem 0.4rem 1rem;
+  border-radius: 999px;
+  animation: nav-in 900ms var(--ease-spring) both;
 }
 
-.glass-nav h1 .brand-logo {
-  width: 2.1rem;
-  height: 2.1rem;
-  flex-shrink: 0;
-  filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.4));
+@keyframes nav-in {
+  from { opacity: 0; transform: translateY(-16px) scale(0.96); }
 }
 
-.glass-nav nav {
+.brand {
   display: flex;
   align-items: center;
-  gap: 0.85rem;
-}
-
-.nav-logout {
-  color: var(--color-text);
-  background: transparent;
-  border: 1px solid var(--color-border);
-  border-radius: 999px;
-  padding: 0.6rem 1.25rem;
-  font: inherit;
-  font-size: 0.95rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: background-color var(--duration) var(--ease),
-    border-color var(--duration) var(--ease), transform var(--duration) var(--ease);
-}
-
-.nav-logout:hover {
-  background: var(--color-danger);
-  border-color: var(--color-danger);
-  transform: translateY(-1px);
-}
-
-.glass-nav nav a {
-  color: var(--color-text);
+  gap: 0.6rem;
+  margin-right: 0.4rem;
+  color: var(--text-primary);
+  font-family: var(--f-display);
+  font-size: 0.78rem;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
   text-decoration: none;
-  padding: 0.6rem 1.25rem;
-  background: transparent;
-  border: 1px solid var(--color-border);
+  white-space: nowrap;
+}
+
+.brand-logo {
+  width: 1.7rem;
+  height: 1.7rem;
+  flex-shrink: 0;
+  fill: none;
+  stroke: var(--silver);
+  stroke-width: 7;
+  transition: transform 700ms var(--ease-spring), stroke 300ms;
+}
+
+.brand:hover .brand-logo {
+  stroke: var(--accent);
+  transform: rotate(-12deg) scale(1.08);
+}
+
+.nav-links {
+  position: relative;
+  display: flex;
+  gap: 0.1rem;
+  min-width: 0;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.nav-links a {
+  position: relative;
+  z-index: 1;
+  flex-shrink: 0;
+  padding: 0.65rem 0.95rem;
   border-radius: 999px;
-  font-size: 0.95rem;
-  font-weight: 600;
-  transition: background-color var(--duration) var(--ease),
-    border-color var(--duration) var(--ease), color var(--duration) var(--ease),
-    transform var(--duration) var(--ease);
+  color: var(--text-secondary);
+  font-family: var(--f-mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  text-decoration: none;
+  white-space: nowrap;
+  transition: color 300ms var(--ease-out);
 }
 
-.glass-nav nav a:hover {
-  border-color: var(--color-accent);
-  color: var(--color-accent);
-  transform: translateY(-1px);
+.nav-links a:hover,
+.nav-links a.activo {
+  color: var(--text-primary);
 }
 
-.glass-nav nav a.activo {
-  background: var(--color-accent);
-  border-color: var(--color-accent);
-  color: #06201d;
+/* Marca roja bajo el enlace activo. */
+.nav-links a.activo::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  bottom: 0.28rem;
+  width: 4px;
+  height: 4px;
+  margin-left: -2px;
+  border-radius: 50%;
+  background: var(--accent);
+}
+
+/* Gota de vidrio que se desliza bajo el enlace activo o el que tiene el cursor. */
+.nav-blob {
+  position: absolute;
+  z-index: 0;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: var(--bw, 0px);
+  border-radius: 999px;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.18), rgba(255, 255, 255, 0.04));
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.32);
+  transform: translateX(var(--bx, 0px));
+  opacity: var(--bo, 0);
+  transition: transform 550ms var(--ease-spring), width 550ms var(--ease-spring), opacity 300ms;
+  pointer-events: none;
+}
+
+.nav-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  margin-left: 0.2rem;
+}
+
+.nav-actions .btn-icon {
+  width: 42px;
+  min-height: 42px;
+}
+
+.nav-actions svg {
+  width: 1.1rem;
+  height: 1.1rem;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.nav-logout:hover:not(:disabled) {
+  color: var(--accent);
+}
+
+/* El contador sobresale del botón, así que la línea de luz no se usa aquí. */
+.nav-cart {
+  overflow: visible;
+}
+
+.nav-cart::after {
+  display: none;
+}
+
+.cart-badge {
+  position: absolute;
+  top: -0.25rem;
+  right: -0.25rem;
+  min-width: 1.15rem;
+  height: 1.15rem;
+  padding: 0 0.3rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--accent-deep);
+  color: var(--on-accent);
+  border-radius: 999px;
+  font-family: var(--f-mono);
+  font-size: 0.62rem;
+  letter-spacing: 0;
+  animation: badge-pop 500ms var(--ease-spring);
+}
+
+@keyframes badge-pop {
+  from { transform: scale(0.4); }
 }
 
 /* Barra de progreso: la única señal de "algo está pasando" que necesita
@@ -164,11 +251,11 @@
   position: fixed;
   top: 0;
   left: 0;
-  height: 2.5px;
+  height: 2px;
   width: 0;
   z-index: 30;
-  background: var(--color-accent);
-  box-shadow: 0 0 8px var(--color-accent);
+  background: var(--accent);
+  box-shadow: 0 0 8px var(--accent);
   transition: width 0.2s ease-out, opacity 0.3s ease;
   opacity: 0;
 }
@@ -179,38 +266,30 @@
   transition: width 8s cubic-bezier(0.1, 0.6, 0.2, 1), opacity 0.2s ease;
 }
 
-@media (max-width: 600px) {
+@media (max-width: 1100px) {
+  .brand span {
+    display: none;
+  }
+}
+
+@media (max-width: 560px) {
   .glass-nav {
-    padding: 1.15rem 1.25rem;
-    gap: 0.75rem;
+    padding-left: 0.6rem;
+    gap: 0.3rem;
   }
 
-  .glass-nav h1 {
-    font-size: 1.15rem;
-  }
-
-  .glass-nav h1 .brand-logo {
-    width: 1.6rem;
-    height: 1.6rem;
-  }
-
-  .glass-nav nav {
-    gap: 0.4rem;
-  }
-
-  .glass-nav nav a {
-    padding: 0.5rem 0.85rem;
-    font-size: 0.85rem;
+  .nav-links a {
+    padding: 0.6rem 0.7rem;
+    font-size: 0.64rem;
   }
 }
 
 main {
-  padding: 2rem;
+  padding: clamp(1rem, 4vw, 3rem);
   animation: fade-in var(--duration) var(--ease);
 }
 
-@media (max-width: 600px) {
-  main {
-    padding: 1rem;
-  }
+/* El home maneja su propio espaciado (portada a sangre completa). */
+.page-background.is-home main {
+  padding: 0;
 }

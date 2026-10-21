@@ -1,0 +1,682 @@
+/* ══════════════════════════════════════════════════════════════════
+   Home de lujo. Sin encapsulación (ver home.ts), así que TODO va bajo
+   `.lux` para no filtrarse al resto de la app.
+   ══════════════════════════════════════════════════════════════════ */
+
+.lux {
+  position: relative;
+  color: var(--text-primary);
+  font-family: var(--f-body);
+  font-size: 1.05rem;
+  line-height: 1.6;
+  animation: lux-in 900ms var(--ease-out) both;
+}
+
+@keyframes lux-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+/* ══════════════════════════ PORTADA ══════════════════════════ */
+
+.lux .hero {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr);
+  align-items: center;
+  gap: clamp(2rem, 4vw, 4rem);
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: clamp(2.5rem, 7vh, 4.5rem) clamp(1.25rem, 5vw, 4rem);
+  min-height: calc(100dvh - 90px);
+}
+
+.lux .hero h1 {
+  font-size: clamp(2.2rem, 5.2vw, 4.4rem);
+  line-height: 1.05;
+}
+
+/* Las palabras del titular suben una por una al cargar. */
+.lux .hero h1 .w {
+  display: inline-block;
+  /* Angular quita los espacios entre etiquetas: el espacio entre palabras va aquí. */
+  margin-right: 0.28em;
+  animation: word-rise 1100ms var(--ease-out) both;
+  animation-delay: calc(var(--i) * 110ms + 200ms);
+}
+
+@keyframes word-rise {
+  from { opacity: 0; transform: translateY(0.5em) rotate(4deg); filter: blur(8px); }
+}
+
+.lux .hero .lede {
+  margin: 1.4rem 0 2.2rem;
+  max-width: 40ch;
+  color: var(--text-secondary);
+  font-size: 1.08rem;
+  animation: fade-up 900ms var(--ease-out) 700ms both;
+}
+
+.lux .hero .ctas {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.8rem;
+  animation: fade-up 900ms var(--ease-out) 900ms both;
+}
+
+@keyframes fade-up {
+  from { opacity: 0; transform: translateY(16px); }
+}
+
+/* ══════════════════════════ TARJETA 3D DE PRODUCTO ══════════════════════════ */
+/* La usan la vitrina del home (coverflow). */
+
+.lux app-carousel3d {
+  --w: 320px;
+  --h: 560px;
+}
+
+.lux .p3d {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  height: 520px;
+  padding: 10px;
+  border-radius: var(--r-card);
+}
+
+.lux .p3d-photo {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+  margin: 0;
+  border-radius: var(--r-inner);
+  overflow: hidden;
+  background: var(--studio);
+  isolation: isolate;
+}
+
+.lux .p3d-photo img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  padding: 12%;
+  mix-blend-mode: multiply;
+  filter: var(--studio-filter);
+  transition: transform 900ms var(--ease-out);
+  pointer-events: none;
+}
+
+.lux .slot.front .p3d-photo img {
+  transform: scale(1.04);
+}
+
+.lux .p3d-meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 1rem;
+  padding: 0.9rem 0.6rem 0.5rem;
+}
+
+.lux .p3d-meta h3 {
+  font-size: 0.98rem;
+  letter-spacing: 0.02em;
+}
+
+.lux .p3d-meta small {
+  display: block;
+  margin-top: 0.25rem;
+  color: var(--text-secondary);
+  font-size: 0.82rem;
+}
+
+.lux .p3d-price {
+  font-family: var(--f-mono);
+  font-size: 0.92rem;
+  white-space: nowrap;
+}
+
+.lux .p3d-add {
+  margin: 0.2rem 0.4rem 0.4rem;
+}
+
+.lux .p3d-add.done {
+  background: linear-gradient(135deg, rgba(120, 220, 150, 0.3), transparent 60%), #0e5c28;
+  border-color: rgba(150, 230, 170, 0.5);
+}
+
+@media (max-width: 960px) {
+  .lux .hero {
+    grid-template-columns: 1fr;
+    min-height: 0;
+  }
+}
+
+@media (max-width: 620px) {
+  .lux app-carousel3d {
+    --w: 240px;
+    --h: 470px;
+  }
+
+  .lux .p3d {
+    height: 430px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .lux .hero h1 .w,
+  .lux .hero .lede,
+  .lux .hero .ctas {
+    animation: none;
+  }
+}
+
+/* ══════════════════════════ LA MAISON ══════════════════════════ */
+
+.lux section:not(.hero) {
+  position: relative;
+  scroll-margin-top: 6rem;
+}
+
+.lux .maison {
+  display: grid;
+  grid-template-columns: minmax(260px, 5fr) 7fr;
+  align-items: center;
+  gap: clamp(2rem, 7vw, 7rem);
+  padding: clamp(6rem, 16vh, 11rem) clamp(1.25rem, 7vw, 7rem);
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.lux .maison-mark {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2rem;
+}
+
+.lux .mono {
+  width: min(100%, 340px);
+  aspect-ratio: 1;
+  overflow: visible;
+}
+
+.lux .mono .draw {
+  fill: none;
+  stroke: var(--silver);
+  stroke-width: 1.1;
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  transition: stroke-dashoffset 2400ms var(--ease-silk);
+}
+
+.lux .mono .letter { transition-delay: 500ms; }
+.lux .mono .letter.p { transition-delay: 900ms; }
+
+.lux .maison-mark.in .mono .draw { stroke-dashoffset: 0; }
+
+.lux .mono .stitch {
+  fill: none;
+  stroke: var(--accent);
+  stroke-width: 1.6;
+  stroke-dasharray: 3 5;
+  transform-box: fill-box;
+  transform-origin: center;
+}
+
+.lux .mono .stitch-reveal {
+  fill: none;
+  stroke: #fff;
+  stroke-width: 8;
+  stroke-dasharray: var(--stitch, 0) 2;
+}
+
+/* Detalle vivo: la costura gira despacio una vez cosida. */
+.lux .maison.sewn .mono .stitch {
+  animation: stitch-turn 60s linear -12s infinite;
+}
+
+@keyframes stitch-turn {
+  to { transform: rotate(360deg); }
+}
+
+.lux .hold {
+  position: relative;
+  overflow: hidden;
+  padding: 0.95rem 1.8rem;
+  background: transparent;
+  color: var(--text-primary);
+  border: 1px solid var(--line-strong);
+  border-radius: 999px;
+  font-family: var(--f-mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  cursor: pointer;
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: none;
+  transition: border-color 400ms var(--ease-out), color 400ms var(--ease-out);
+}
+
+.lux .hold-track {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: var(--accent-muted);
+  transform-origin: left;
+  transform: scaleX(var(--stitch, 0));
+}
+
+.lux .maison.sewn .hold {
+  border-color: var(--accent);
+  color: var(--accent);
+  cursor: default;
+}
+
+.lux .maison-copy .display {
+  font-size: clamp(1.8rem, 3.4vw, 3.2rem);
+  max-width: 14ch;
+  margin: 1.4rem 0 2.4rem;
+}
+
+.lux .maison-copy .reveal:nth-child(2) { transition-delay: 120ms; }
+.lux .maison-copy .reveal.settled { transition-delay: 0ms; }
+
+.lux .stitched-lines {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 1.1rem;
+}
+
+.lux .stitched-lines li {
+  max-width: 46ch;
+  padding-left: 1.6rem;
+  position: relative;
+  color: var(--text-secondary);
+  opacity: 0.55;
+  transition: opacity 900ms var(--ease-out), color 900ms var(--ease-out), transform 900ms var(--ease-out);
+}
+
+.lux .stitched-lines li::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0.8em;
+  width: 0.9rem;
+  height: 1px;
+  background: var(--line-strong);
+  transition: background-color 900ms var(--ease-out);
+}
+
+.lux .maison.sewn .stitched-lines li {
+  opacity: 1;
+  color: var(--text-primary);
+  transform: translateX(4px);
+}
+
+.lux .maison.sewn .stitched-lines li::before { background: var(--accent); }
+.lux .maison.sewn .stitched-lines li:nth-child(2) { transition-delay: 150ms; }
+.lux .maison.sewn .stitched-lines li:nth-child(3) { transition-delay: 300ms; }
+
+/* ══════════════════════════ LA COLECCIÓN ══════════════════════════ */
+
+.lux .vitrina {
+  padding: clamp(4rem, 12vh, 8rem) clamp(1.25rem, 6vw, 6rem);
+  max-width: 1400px;
+  margin: 0 auto;
+  border-top: 1px solid var(--line);
+}
+
+.lux .vitrina-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-bottom: clamp(3rem, 10vh, 6rem);
+}
+
+.lux .vitrina-head .display {
+  font-size: clamp(1.6rem, 3vw, 2.8rem);
+}
+
+.lux .state {
+  color: var(--text-secondary);
+  text-align: center;
+  padding: 4rem 0;
+}
+
+.lux .piece {
+  display: grid;
+  grid-template-columns: 7fr 5fr;
+  align-items: center;
+  gap: clamp(2rem, 6vw, 6rem);
+  margin-bottom: clamp(5rem, 14vh, 9rem);
+}
+
+.lux .piece.flip { grid-template-columns: 5fr 7fr; }
+.lux .piece.flip .piece-img { order: 2; }
+
+.lux .piece-img {
+  position: relative;
+  margin: 0;
+  aspect-ratio: 4 / 5;
+  max-height: 72vh;
+  justify-self: center;
+  width: 100%;
+  overflow: hidden;
+  border-radius: var(--r-card);
+  background: #eceae6;
+  isolation: isolate;
+}
+
+.lux .piece-img img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  padding: 9%;
+  mix-blend-mode: multiply;
+  /* Lleva el fondo casi blanco de la foto a blanco puro, que el multiply
+     funde con el panel: el producto queda "flotando" en el estudio. */
+  filter: var(--studio-filter);
+  display: block;
+  transform: scale(1.1);
+  transition: transform 1600ms var(--ease-out);
+}
+
+.lux .piece.in .piece-img img { transform: scale(1); }
+.lux .piece.in .piece-img:hover img { transform: scale(1.03); }
+
+.lux .curtain {
+  position: absolute;
+  inset: 0;
+  background: var(--canvas);
+  transform-origin: right;
+  transition: transform 1300ms var(--ease-silk);
+}
+
+.lux .piece.flip .curtain { transform-origin: left; }
+.lux .piece.in .curtain { transform: scaleX(0); }
+
+.lux .piece-info {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 1.1rem;
+}
+
+.lux .piece-info > * {
+  opacity: 0;
+  transform: translateY(16px);
+  transition: opacity 900ms var(--ease-out), transform 900ms var(--ease-out);
+}
+
+.lux .piece.in .piece-info > * { opacity: 1; transform: none; }
+.lux .piece.in .piece-info > :nth-child(1) { transition-delay: 300ms; }
+.lux .piece.in .piece-info > :nth-child(2) { transition-delay: 400ms; }
+.lux .piece.in .piece-info > :nth-child(3) { transition-delay: 500ms; }
+.lux .piece.in .piece-info > :nth-child(4) { transition-delay: 600ms; }
+.lux .piece.in .piece-info > :nth-child(5) { transition-delay: 700ms; }
+.lux .piece.in.settled .piece-info > :nth-child(n) { transition-delay: 0ms; }
+
+.lux .piece-info .display {
+  font-size: clamp(1.4rem, 2.6vw, 2.4rem);
+  max-width: 14ch;
+}
+
+.lux .piece-desc {
+  margin: 0;
+  max-width: 38ch;
+  color: var(--text-secondary);
+}
+
+.lux .piece-price {
+  margin: 0;
+  font-family: var(--f-mono);
+  font-size: 0.95rem;
+  letter-spacing: 0.08em;
+}
+
+/* Detalle vivo: una línea de plata que respira junto al precio. */
+.lux .piece-info::after {
+  content: '';
+  position: absolute;
+  left: -2rem;
+  top: 0;
+  bottom: 0;
+  width: 1px;
+  background: linear-gradient(transparent, var(--silver), transparent);
+  opacity: 0.15;
+  animation: breathe 6s ease-in-out -2s infinite;
+}
+
+.lux .piece.flip .piece-info::after { left: auto; right: -2rem; }
+
+@keyframes breathe {
+  50% { opacity: 0.5; }
+}
+
+/* ══════════════════════════ LA TIENDA ══════════════════════════ */
+
+.lux .tienda {
+  padding: 0 clamp(1.25rem, 6vw, 6rem) clamp(5rem, 14vh, 9rem);
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.lux .map {
+  height: min(64vh, 560px);
+  overflow: hidden;
+  border-radius: var(--r-card);
+  border: 1px solid var(--line);
+}
+
+.lux .map iframe {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border: 0;
+  filter: grayscale(1) invert(0.9) contrast(0.85) brightness(0.9);
+}
+
+.lux .tienda-card {
+  position: relative;
+  width: min(100%, 460px);
+  margin: -9rem 0 0 clamp(1rem, 4vw, 4rem);
+  padding: 2.4rem;
+  background: rgba(23, 25, 30, 0.86);
+  border: 1px solid var(--line);
+  border-radius: var(--r-card);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+}
+
+.lux .tienda-card .display {
+  font-size: clamp(1.3rem, 2.2vw, 1.9rem);
+  max-width: 14ch;
+  margin: 1rem 0 1.8rem;
+}
+
+.lux .tienda-card > .mono-label:first-child::before {
+  content: '';
+  display: inline-block;
+  width: 7px;
+  height: 7px;
+  margin-right: 0.7rem;
+  border-radius: 50%;
+  background: var(--accent);
+  vertical-align: 0.1em;
+  animation: breathe-dot 4s ease-in-out -1s infinite;
+}
+
+@keyframes breathe-dot {
+  50% { opacity: 0.35; }
+}
+
+.lux .tienda-card dl {
+  margin: 0;
+  display: grid;
+  gap: 1rem;
+}
+
+.lux .tienda-card dl > div {
+  display: grid;
+  grid-template-columns: 7.5rem 1fr;
+  align-items: baseline;
+  gap: 1rem;
+}
+
+.lux .tienda-card dd {
+  margin: 0;
+}
+
+.lux .tienda-card a {
+  color: var(--text-primary);
+  text-decoration-color: var(--line-strong);
+  text-underline-offset: 4px;
+  transition: color 300ms var(--ease-out);
+}
+
+.lux .tienda-card a:hover { color: var(--accent); }
+
+/* ══════════════════════════ CIERRE ══════════════════════════ */
+
+.lux .closing {
+  text-align: center;
+  padding: clamp(4rem, 12vh, 8rem) 1.25rem clamp(6rem, 16vh, 10rem);
+}
+
+.lux .thread {
+  display: block;
+  width: min(100%, 1100px);
+  height: 60px;
+  margin: 0 auto 3rem;
+}
+
+.lux .thread .draw {
+  fill: none;
+  stroke: var(--silver);
+  stroke-width: 1;
+  vector-effect: non-scaling-stroke;
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  opacity: 0.5;
+  transition: stroke-dashoffset 2600ms var(--ease-silk);
+}
+
+.lux .closing.in .thread .draw { stroke-dashoffset: 0; }
+
+.lux .closing .display {
+  font-size: clamp(1.8rem, 4vw, 3.6rem);
+  max-width: 16ch;
+  margin: 0 auto 2.6rem;
+}
+
+.lux-footer {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: baseline;
+  gap: 2rem;
+  padding: 2.6rem clamp(1.25rem, 6vw, 6rem);
+  border-top: 1px solid var(--line);
+}
+
+.lux .brand-line {
+  font-size: 0.95rem;
+  letter-spacing: 0.3em;
+}
+
+.lux-footer summary {
+  cursor: pointer;
+  list-style: none;
+  transition: color 300ms var(--ease-out);
+}
+
+.lux-footer summary::-webkit-details-marker { display: none; }
+.lux-footer summary::after { content: ' +'; }
+.lux-footer details[open] summary::after { content: ' −'; }
+.lux-footer summary:hover { color: var(--text-primary); }
+
+.lux-footer ol {
+  margin: 1.2rem 0 0;
+  padding-left: 1.2rem;
+  max-width: 70ch;
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+  display: grid;
+  gap: 0.5rem;
+}
+
+/* ══════════════════════════ RESPONSIVE ══════════════════════════ */
+
+@media (max-width: 860px) {
+  .lux .maison,
+  .lux .piece,
+  .lux .piece.flip {
+    grid-template-columns: 1fr;
+  }
+
+  .lux .piece.flip .piece-img { order: 0; }
+  .lux .piece-info::after { display: none; }
+  .lux .maison-copy { text-align: left; }
+
+  .lux .tienda-card {
+    margin: -4rem auto 0;
+  }
+
+  .lux-footer {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 480px) {
+  .lux .tienda-card { padding: 1.6rem; }
+  .lux .tienda-card dl > div { grid-template-columns: 1fr; gap: 0.2rem; }
+}
+
+@media (max-height: 560px) {
+  .lux .cue { display: none; }
+}
+
+/* ══════════════════ PAUSA Y MOVIMIENTO REDUCIDO ══════════════════ */
+
+.lux.paused *,
+.lux.paused *::before,
+.lux.paused *::after {
+  animation-play-state: paused !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .lux *,
+  .lux *::before,
+  .lux *::after {
+    animation: none !important;
+    transition: none !important;
+  }
+
+  .lux .reveal,
+  .lux .piece-info > * {
+    opacity: 1;
+    transform: none;
+  }
+
+  .lux .piece-img img { transform: none; }
+  .lux .curtain { transform: scaleX(0); }
+  .lux .mono .draw,
+  .lux .thread .draw { stroke-dashoffset: 0; }
+}
+
+.lux .piece-info .btn-line {
+  align-self: flex-start;
+}
+
+.lux .piece-info .btn-line.done {
+  border-color: var(--accent);
+  background: var(--accent);
+  color: var(--on-accent);
+}

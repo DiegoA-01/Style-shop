@@ -1,0 +1,174 @@
+:host {
+  display: block;
+}
+
+.equipo {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: clamp(1.5rem, 5vh, 3rem) 0 clamp(3rem, 8vh, 5rem);
+}
+
+.eq-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  flex-wrap: wrap;
+  gap: 1.5rem;
+  padding-bottom: 2rem;
+  border-bottom: 1px solid var(--line);
+}
+
+.eq-head .display {
+  margin-top: 1rem;
+  font-size: clamp(1.6rem, 3.6vw, 3rem);
+}
+
+.chips {
+  display: flex;
+  gap: 0.5rem;
+  margin: 1.6rem 0 1.2rem;
+  flex-wrap: wrap;
+}
+
+.chip {
+  padding: 0.6rem 1.1rem;
+  background: transparent;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  color: var(--text-secondary);
+  font-family: var(--f-mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: border-color 300ms var(--ease-out), color 300ms var(--ease-out);
+}
+
+.chip:hover {
+  border-color: var(--line-strong);
+  color: var(--text-primary);
+}
+
+.chip.on {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.note {
+  margin: 0 0 1.4rem;
+  max-width: 60ch;
+  color: var(--text-secondary);
+  font-size: 0.92rem;
+}
+
+.table-wrap {
+  overflow-x: auto;
+  border: 1px solid var(--line);
+  border-radius: var(--r-card);
+  background: var(--panel);
+}
+
+.accounts {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.95rem;
+}
+
+.accounts th,
+.accounts td {
+  padding: 1rem 1.2rem;
+  border-bottom: 1px solid var(--line);
+  text-align: left;
+  vertical-align: middle;
+}
+
+.accounts tbody tr:last-child th,
+.accounts tbody tr:last-child td {
+  border-bottom: 0;
+}
+
+.accounts thead th {
+  color: var(--text-secondary);
+  font-family: var(--f-mono);
+  font-size: 0.66rem;
+  font-weight: 400;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+.accounts tbody th {
+  font-weight: 600;
+}
+
+.accounts tbody tr {
+  transition: background-color 250ms ease;
+}
+
+.accounts tbody tr:hover {
+  background: rgba(237, 237, 238, 0.03);
+}
+
+.email {
+  color: var(--text-secondary);
+}
+
+.me {
+  margin-left: 0.5rem;
+  padding: 0.1rem 0.45rem;
+  border: 1px solid var(--line-strong);
+  border-radius: 999px;
+  color: var(--text-secondary);
+  font-family: var(--f-mono);
+  font-size: 0.6rem;
+  font-weight: 400;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+/* Rol: punto + nombre (el color nunca va solo). */
+.role {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-family: var(--f-mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.role::before {
+  content: '';
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--line-strong);
+}
+
+.role[data-role='SUPER_ADMIN']::before { background: var(--accent); }
+.role[data-role='CAJERO']::before { background: var(--silver); }
+.role[data-role='TRABAJADOR']::before { background: #7d7d82; }
+
+.actions {
+  text-align: right;
+}
+
+.empty {
+  color: var(--text-secondary);
+  text-align: center;
+}
+
+.lux-panel.narrow .display {
+  margin-top: 1rem;
+  font-size: clamp(1.2rem, 2.6vw, 1.6rem);
+}
+
+@media (max-width: 640px) {
+  .email {
+    display: none;
+  }
+
+  .accounts th,
+  .accounts td {
+    padding: 0.9rem 0.8rem;
+  }
+}

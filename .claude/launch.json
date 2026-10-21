@@ -1,0 +1,24 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "backend",
+      "runtimeExecutable": "mvn",
+      "runtimeArgs": [
+        "-f",
+        "C:/Users/Usuario/OneDrive/Escritorio/Arle TypeScript D/Angular/proyecto-final/diego/backend/pom.xml",
+        "spring-boot:run"
+      ],
+      "port": 8080
+    },
+    {
+      "name": "frontend",
+      "runtimeExecutable": "node",
+      "runtimeArgs": [
+        "-e",
+        "process.chdir(\"C:/Users/Usuario/OneDrive/Escritorio/Arle TypeScript D/Angular/proyecto-final/diego/frontend\");process.argv.push(\"ng\",\"serve\",\"--port\",\"4200\");require(\"C:/Users/Usuario/OneDrive/Escritorio/Arle TypeScript D/Angular/proyecto-final/diego/frontend/node_modules/@angular/cli/bin/ng.js\")"
+      ],
+      "port": 4200
+    }
+  ]
+}

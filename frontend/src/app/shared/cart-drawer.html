@@ -1,0 +1,148 @@
+@if (cartService.isOpen()) {
+  <div class="cart-backdrop" (click)="cerrar()">
+    <aside class="cart-drawer" role="dialog" aria-modal="true" aria-labelledby="cart-title" (click)="$event.stopPropagation()">
+      <header class="cart-header">
+        <h2 id="cart-title">Tu carrito</h2>
+        <button type="button" class="close-cart" aria-label="Cerrar" (click)="cerrar()">&times;</button>
+      </header>
+
+      @if (cartService.items().length === 0) {
+        <p class="cart-empty">Tu carrito está vacío. Agrega productos desde el catálogo.</p>
+      } @else if (mostrarLogin()) {
+        <form [formGroup]="loginForm" (ngSubmit)="ingresar()" class="checkout-form">
+          <p class="checkout-hint">Inicia sesión para continuar con tu compra.</p>
+
+          @if (loginError()) {
+            <p class="login-error">{{ loginError() }}</p>
+          }
+
+          <label>
+            Usuario
+            <input type="text" formControlName="username" autocomplete="username">
+          </label>
+
+          <label>
+            Contraseña
+            <input type="password" formControlName="password" autocomplete="current-password">
+          </label>
+
+          <div class="checkout-actions">
+            <button type="button" (click)="volverAlCarrito()">Volver</button>
+            <button type="submit" [disabled]="loginForm.invalid || ingresando()">
+              @if (ingresando()) {
+                <span class="spinner" aria-hidden="true"></span> Ingresando...
+              } @else {
+                Ingresar
+              }
+            </button>
+          </div>
+
+          <p class="checkout-hint">¿No tienes cuenta? <button type="button" class="link-btn" (click)="irARegistro()">Crea una aquí</button></p>
+        </form>
+      } @else if (mostrarRegistro()) {
+        <form [formGroup]="registerForm" (ngSubmit)="registrar()" class="checkout-form">
+          <p class="checkout-hint">Crea tu cuenta en un minuto y sigue con tu compra.</p>
+
+          @if (registroError()) {
+            <p class="login-error">{{ registroError() }}</p>
+          }
+
+          <label>
+            Usuario
+            <input type="text" formControlName="username" autocomplete="username">
+          </label>
+          @if (registerForm.controls.username.invalid && registerForm.controls.username.touched) {
+            <small class="field-error">El usuario necesita al menos 3 caracteres.</small>
+          }
+
+          <label>
+            Correo
+            <input type="email" formControlName="email" autocomplete="email">
+          </label>
+          @if (registerForm.controls.email.invalid && registerForm.controls.email.touched) {
+            <small class="field-error">Ese correo no parece completo.</small>
+          }
+
+          <label>
+            Contraseña
+            <input type="password" formControlName="password" autocomplete="new-password">
+          </label>
+          @if (registerForm.controls.password.invalid && registerForm.controls.password.touched) {
+            <small class="field-error">Usa al menos 6 caracteres.</small>
+          }
+
+          <label>
+            Confirmar contraseña
+            <input type="password" formControlName="confirmPassword" autocomplete="new-password">
+          </label>
+          @if (registerForm.errors?.['passwordsDistintas'] && registerForm.controls.confirmPassword.touched) {
+            <small class="field-error">Las contraseñas no coinciden.</small>
+          }
+
+          <div class="checkout-actions">
+            <button type="button" (click)="volverAlCarrito()">Volver</button>
+            <button type="submit" [disabled]="registerForm.invalid || registrando()">
+              @if (registrando()) {
+                <span class="spinner" aria-hidden="true"></span> Creando cuenta...
+              } @else {
+                Crear cuenta
+              }
+            </button>
+          </div>
+
+          <p class="checkout-hint">¿Ya tienes cuenta? <button type="button" class="link-btn" (click)="irALogin()">Inicia sesión</button></p>
+        </form>
+      } @else if (!mostrarFormulario()) {
+        <ul class="cart-items">
+          @for (item of cartService.items(); track item.product.id) {
+            <li class="cart-item">
+              <img [src]="getImagenProducto(item)" [alt]="item.product.name" class="cart-item-image">
+              <div class="cart-item-info">
+                <p class="cart-item-name">{{ item.product.name }}</p>
+                <p class="cart-item-price">{{ item.product.price | copCurrency }}</p>
+                <div class="cart-item-qty">
+                  <button type="button" aria-label="Restar" (click)="cartService.actualizarCantidad(item.product.id, item.quantity - 1)">−</button>
+                  <span>{{ item.quantity }}</span>
+                  <button type="button" aria-label="Sumar" (click)="cartService.actualizarCantidad(item.product.id, item.quantity + 1)">+</button>
+                </div>
+              </div>
+              <button type="button" class="remove-item" aria-label="Quitar del carrito" (click)="cartService.eliminar(item.product.id)">&times;</button>
+            </li>
+          }
+        </ul>
+
+        <footer class="cart-footer">
+          <p class="cart-total">Total: <strong>{{ cartService.total() | copCurrency }}</strong></p>
+          <button type="button" class="glass-button" (click)="irAConfirmar()">Confirmar compra</button>
+        </footer>
+      } @else {
+        <form [formGroup]="form" (ngSubmit)="confirmarPedido()" class="checkout-form">
+          <p class="cart-total">Total: <strong>{{ cartService.total() | copCurrency }}</strong></p>
+
+          <label>
+            Nombre
+            <input type="text" formControlName="customerName" autocomplete="name">
+          </label>
+
+          <label>
+            Teléfono
+            <input type="tel" formControlName="customerPhone" autocomplete="tel" placeholder="3001234567">
+          </label>
+
+          <p class="checkout-hint">Al confirmar se abrirá WhatsApp con tu pedido para coordinar el pago y la entrega.</p>
+
+          <div class="checkout-actions">
+            <button type="button" (click)="volverAlCarrito()">Volver</button>
+            <button type="submit" [disabled]="form.invalid || confirmando()">
+              @if (confirmando()) {
+                <span class="spinner" aria-hidden="true"></span> Enviando...
+              } @else {
+                Confirmar por WhatsApp
+              }
+            </button>
+          </div>
+        </form>
+      }
+    </aside>
+  </div>
+}

@@ -1,0 +1,73 @@
+<div class="chart-tools">
+  <button type="button" class="link-mono" (click)="asTable.set(!asTable())" [attr.aria-pressed]="asTable()">
+    {{ asTable() ? 'Ver gráfica' : 'Ver como tabla' }}
+  </button>
+</div>
+
+@if (!asTable()) {
+  <div class="plot" appReveal role="group" [attr.aria-label]="measure()">
+    <div class="grid" aria-hidden="true">
+      @for (tick of scale().ticks; track tick) {
+        <div class="tick" [style.bottom.%]="percentOf(tick)">
+          <span>{{ format()(tick) }}</span>
+        </div>
+      }
+    </div>
+
+    <div class="cols">
+      @for (item of items(); track item.label; let i = $index) {
+        <div
+          class="col"
+          tabindex="0"
+          [class.on]="hovered() === i"
+          [style.--i]="i"
+          [attr.aria-label]="ariaFor(item)"
+          (pointerenter)="hovered.set(i)"
+          (pointerleave)="hovered.set(null)"
+          (focus)="hovered.set(i)"
+          (blur)="hovered.set(null)"
+        >
+          <div class="bar-area">
+            @if (i === peak()) {
+              <span class="peak-label" aria-hidden="true" [style.bottom.%]="percentOf(item.value)">
+                {{ format()(item.value) }}
+              </span>
+            }
+            <div class="bar" [style.height.%]="percentOf(item.value)"></div>
+          </div>
+          <span class="x-label" aria-hidden="true">{{ item.label }}</span>
+
+          @if (hovered() === i) {
+            <div class="tip" role="tooltip" [class.flip]="i > items().length - 3">
+              <strong>{{ format()(item.value) }}</strong>
+              <span class="tip-name">{{ item.label }} · {{ measure() }}</span>
+              @for (line of item.detail; track line) {
+                <span>{{ line }}</span>
+              }
+            </div>
+          }
+        </div>
+      }
+    </div>
+  </div>
+} @else {
+  <table class="chart-table">
+    <caption class="sr-only">{{ measure() }}</caption>
+    <thead>
+      <tr>
+        <th scope="col">Periodo</th>
+        <th scope="col">Valor</th>
+        <th scope="col">Detalle</th>
+      </tr>
+    </thead>
+    <tbody>
+      @for (item of items(); track item.label) {
+        <tr>
+          <th scope="row">{{ item.label }}</th>
+          <td class="num">{{ format()(item.value) }}</td>
+          <td>{{ item.detail.join(' · ') }}</td>
+        </tr>
+      }
+    </tbody>
+  </table>
+}

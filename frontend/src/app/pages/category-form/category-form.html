@@ -1,33 +1,42 @@
-@if (error()) {
-  <p class="glass-message error">{{ error() }}</p>
-}
-
-<form [formGroup]="form" (ngSubmit)="guardar()" class="glass-card form-card">
-  <label>
-    Nombre
-    <input type="text" formControlName="name">
-  </label>
-  @if (form.controls.name.invalid && form.controls.name.touched) {
-    <small class="error">El nombre debe tener al menos 2 caracteres.</small>
+<div class="form-shell" [class.standalone]="!embedded()">
+  @if (!embedded()) {
+    <header class="form-head">
+      <p class="mono-label">Personal</p>
+      <h2 class="display">{{ id() ? 'Editar categoría' : 'Nueva categoría' }}</h2>
+    </header>
   }
 
-  <label>
-    Descripción
-    <textarea formControlName="description" rows="2"></textarea>
-  </label>
+  @if (error()) {
+    <p class="form-error" role="alert">{{ error() }}</p>
+  }
 
-  <div class="card-actions">
-    <button type="submit" [disabled]="form.invalid || guardando()">
-      @if (guardando()) {
-        <span class="spinner" aria-hidden="true"></span> Guardando...
-      } @else {
-        Guardar
-      }
-    </button>
-    @if (embedded()) {
-      <button type="button" (click)="cerrar()">Cancelar</button>
-    } @else {
-      <a routerLink="/categories">Cancelar</a>
+  <form [formGroup]="form" (ngSubmit)="guardar()" class="lux-form">
+    <label>
+      Nombre
+      <input type="text" formControlName="name">
+    </label>
+    @if (form.controls.name.invalid && form.controls.name.touched) {
+      <small class="error">El nombre necesita al menos 2 letras.</small>
     }
-  </div>
-</form>
+
+    <label>
+      Descripción
+      <textarea formControlName="description" rows="2"></textarea>
+    </label>
+
+    <div class="form-actions">
+      @if (embedded()) {
+        <button type="button" class="btn-line" (click)="cerrar()">Cancelar</button>
+      } @else {
+        <a class="btn-line" routerLink="/categories">Cancelar</a>
+      }
+      <button type="submit" class="btn" [disabled]="form.invalid || guardando()">
+        @if (guardando()) {
+          <span class="spinner" aria-hidden="true"></span> Guardando
+        } @else {
+          Guardar
+        }
+      </button>
+    </div>
+  </form>
+</div>

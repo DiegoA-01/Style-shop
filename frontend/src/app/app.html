@@ -1,29 +1,61 @@
-<div class="page-background">
+<div class="page-background" [class.is-home]="isHome()">
   <div class="top-progress" [class.active]="loadingService.isLoading()" aria-hidden="true"></div>
 
-  <header class="glass-nav">
-    <h1>
-      <svg class="brand-logo" viewBox="0 0 100 100" role="img" aria-label="Logo Style Shop">
-        <circle cx="50" cy="50" r="42" fill="#ffffff" stroke="#111111" stroke-width="4"/>
-        <text x="50" y="50" text-anchor="middle" dy="0.35em" font-family="Inter, system-ui, sans-serif" font-weight="800" font-size="36" fill="#111111">DP</text>
-      </svg>
-      Style Shop
-    </h1>
-    <nav>
-      @if (authService.isLoggedIn()) {
-        <a routerLink="/products" routerLinkActive="activo">Productos</a>
-        <a routerLink="/categories" routerLinkActive="activo">Categorías</a>
-        <button type="button" class="nav-logout" (click)="cerrarSesion()">Cerrar sesión</button>
-      } @else {
-        <a routerLink="/login" routerLinkActive="activo">Iniciar sesión</a>
-        <a routerLink="/register" routerLinkActive="activo">Registrarse</a>
-      }
-    </nav>
-  </header>
+  <!-- Menú: pastilla de vidrio flotante; la "gota" se desliza bajo el enlace activo. -->
+  <div class="nav-wrap">
+    <header class="glass-nav glass">
+      <a class="brand" [routerLink]="authService.isAdmin() ? '/admin' : '/'" aria-label="Style Shop, inicio">
+        <svg class="brand-logo" viewBox="0 0 200 200" aria-hidden="true">
+          <circle cx="100" cy="100" r="92" />
+          <path d="M62 52 L62 148 L88 148 C124 148 142 126 142 100 C142 74 124 52 88 52 Z" />
+          <path d="M104 150 L104 64 L130 64 C150 64 160 74 160 88 C160 102 150 112 130 112 L104 112" />
+        </svg>
+        <span>Style Shop</span>
+      </a>
+      <nav class="nav-links" #navLinks (pointerleave)="moverGota()">
+        <span class="nav-blob" aria-hidden="true"></span>
+        @if (authService.isAdmin()) {
+          <a routerLink="/admin" routerLinkActive="activo" (pointerenter)="moverGota($event)">Panel</a>
+        } @else {
+          <a routerLink="/" routerLinkActive="activo" [routerLinkActiveOptions]="{ exact: true }" (pointerenter)="moverGota($event)">Inicio</a>
+        }
+        <a routerLink="/products" routerLinkActive="activo" (pointerenter)="moverGota($event)">Productos</a>
+        <a routerLink="/categories" routerLinkActive="activo" (pointerenter)="moverGota($event)">Categorías</a>
+        @if (authService.canSell()) {
+          <a routerLink="/orders" routerLinkActive="activo" (pointerenter)="moverGota($event)">Pedidos</a>
+        }
+        @if (authService.isAdmin()) {
+          <a routerLink="/users" routerLinkActive="activo" (pointerenter)="moverGota($event)">Equipo</a>
+        }
+        @if (!authService.isLoggedIn()) {
+          <a routerLink="/login" routerLinkActive="activo" (pointerenter)="moverGota($event)">Iniciar sesión</a>
+        }
+      </nav>
+      <div class="nav-actions">
+        @if (authService.isLoggedIn()) {
+          <button type="button" class="btn-line btn-icon nav-logout" aria-label="Cerrar sesión" title="Cerrar sesión" (click)="cerrarSesion()">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 4h3a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-3"/><path d="M10 16l-4-4 4-4"/><path d="M6 12h10"/></svg>
+          </button>
+        }
+        <!-- El super admin no compra: solo ve estadísticas, así que no tiene bolsa. -->
+        @if (!authService.isAdmin()) {
+          <button type="button" class="btn-line btn-icon nav-cart" aria-label="Ver bolsa" (click)="cartService.abrir()">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 8h12l-1 12H7L6 8Z"/><path d="M9 8V6a3 3 0 0 1 6 0v2"/></svg>
+            @if (cartService.itemCount() > 0) {
+              <span class="cart-badge">{{ cartService.itemCount() }}</span>
+            }
+          </button>
+        }
+      </div>
+    </header>
+  </div>
 
   <main>
     <router-outlet />
   </main>
 
   <app-toast-container />
+  @if (!authService.isAdmin()) {
+    <app-cart-drawer />
+  }
 </div>

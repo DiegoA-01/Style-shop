@@ -2,6 +2,8 @@ package com.proyecto.diego.entity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -31,4 +33,15 @@ public class User {
 
     @Column(nullable = false)
     private String password;
+
+    // columnDefinition con DEFAULT para que Hibernate pueda hacer ALTER TABLE
+    // ADD COLUMN sobre una tabla con filas existentes (usuarios ya registrados
+    // antes de que existieran los roles) sin que MySQL rechace el NOT NULL.
+    // El default en Java es USUARIO (el menos privilegiado): tanto el registro
+    // público como la creación de cuentas desde /users asignan el rol
+    // explícitamente, así que este valor solo protege contra un `new User()`
+    // futuro que olvide setearlo.
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, length = 20, columnDefinition = "VARCHAR(20) DEFAULT 'TRABAJADOR'")
+    private Role role = Role.USUARIO;
 }

@@ -1,8 +1,27 @@
 import { Routes } from '@angular/router';
-import { authGuard } from './guards/auth.guard';
+import { staffGuard } from './guards/staff.guard';
+import { adminGuard } from './guards/admin.guard';
+import { sellerGuard } from './guards/seller.guard';
+import { homeGuard } from './guards/home.guard';
 
 export const routes: Routes = [
-  { path: '', redirectTo: 'products', pathMatch: 'full' },
+  // El super admin no ve la landing: homeGuard lo lleva a su panel.
+  {
+    path: '',
+    title: 'Style Shop',
+    canActivate: [homeGuard],
+    loadComponent: () =>
+      import('./pages/home/home').then(m => m.Home),
+  },
+
+  // Panel del super admin: ventas del día, gráficas, productos y equipo.
+  {
+    path: 'admin',
+    title: 'Panel · Style Shop',
+    canActivate: [adminGuard],
+    loadComponent: () =>
+      import('./pages/admin/admin-dashboard').then(m => m.AdminDashboard),
+  },
 
   {
     path: 'login',
@@ -17,24 +36,25 @@ export const routes: Routes = [
       import('./pages/register/register').then(m => m.Register),
   },
 
+  // Catálogo público: cualquiera puede verlo sin cuenta (el backend ya
+  // permite GET /product y /category sin token).
   {
     path: 'products',
     title: 'Productos · Catálogo',
-    canActivate: [authGuard],
     loadComponent: () =>
       import('./pages/product-list/product-list').then(m => m.ProductList),
   },
   {
     path: 'products/new',
     title: 'Nuevo producto',
-    canActivate: [authGuard],
+    canActivate: [staffGuard],
     loadComponent: () =>
       import('./pages/product-form/product-form').then(m => m.ProductForm),
   },
   {
     path: 'products/:id/edit',
     title: 'Editar producto',
-    canActivate: [authGuard],
+    canActivate: [staffGuard],
     loadComponent: () =>
       import('./pages/product-form/product-form').then(m => m.ProductForm),
   },
@@ -42,24 +62,41 @@ export const routes: Routes = [
   {
     path: 'categories',
     title: 'Categorías · Catálogo',
-    canActivate: [authGuard],
     loadComponent: () =>
       import('./pages/category-list/category-list').then(m => m.CategoryList),
   },
   {
     path: 'categories/new',
     title: 'Nueva categoría',
-    canActivate: [authGuard],
+    canActivate: [staffGuard],
     loadComponent: () =>
       import('./pages/category-form/category-form').then(m => m.CategoryForm),
   },
   {
     path: 'categories/:id/edit',
     title: 'Editar categoría',
-    canActivate: [authGuard],
+    canActivate: [staffGuard],
     loadComponent: () =>
       import('./pages/category-form/category-form').then(m => m.CategoryForm),
   },
 
-  { path: '**', redirectTo: 'products' },
+  // Historial de pedidos: quien maneja ventas (CAJERO o SUPER_ADMIN).
+  {
+    path: 'orders',
+    title: 'Pedidos · Catálogo',
+    canActivate: [sellerGuard],
+    loadComponent: () =>
+      import('./pages/order-list/order-list').then(m => m.OrderList),
+  },
+
+  // Gestión de cuentas: exclusiva del super admin.
+  {
+    path: 'users',
+    title: 'Usuarios · Catálogo',
+    canActivate: [adminGuard],
+    loadComponent: () =>
+      import('./pages/user-list/user-list').then(m => m.UserList),
+  },
+
+  { path: '**', redirectTo: '' },
 ];

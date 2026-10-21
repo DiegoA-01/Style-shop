@@ -3,17 +3,55 @@
    estilo global (heurística "consistencia y estándares") se hace acá,
    no repitiendo valores mágicos en cada componente. */
 :root {
-  --color-bg: #0a0b10;
-  --color-surface: rgba(255, 255, 255, 0.06);
-  --color-surface-strong: rgba(255, 255, 255, 0.1);
-  --color-border: rgba(255, 255, 255, 0.14);
-  --color-text: #f5f6f8;
-  --color-text-muted: rgba(245, 246, 248, 0.68);
+  /* Identidad Style Shop: negro, gris y un rojo que aparece en dosis
+     contadas (botón principal, foco, contador de la bolsa, datos). */
+  --canvas: #0b0b0c;         /* negro, nunca puro */
+  --panel: #161617;
+  --silver: #c4c4c8;         /* gris acero */
+  --accent: #e5383b;         /* rojo: texto/íconos/bordes sobre negro (4.3:1 sobre el panel) */
+  --accent-hover: #ef5350;
+  --accent-deep: #a8141f;    /* rojo de relleno: lleva texto blanco encima (7:1) */
+  --accent-muted: rgba(229, 56, 59, 0.28);
+  --on-accent: #f7f7f7;
+  --text-primary: #ededee;   /* blanco humo */
+  --text-secondary: #9c9ca1; /* gris medio */
+  --line: #2e2e31;           /* separadores decorativos */
+  --line-strong: #5a5a5f;    /* bordes de elementos interactivos (3:1) */
+  /* Vidrio líquido: aproximación web (desenfoque + bordes + brillos); Apple no
+     publica ese material para la web. */
+  --glass-fill: linear-gradient(135deg, rgba(255, 255, 255, 0.13), rgba(255, 255, 255, 0.02) 60%), rgba(22, 22, 23, 0.42);
+  --glass-edge: rgba(255, 255, 255, 0.18);
+  --glass-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.32), inset 0 -1px 0 rgba(255, 255, 255, 0.05), 0 18px 50px rgba(0, 0, 0, 0.45);
+  --glass-blur: blur(22px) saturate(170%);
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+  /* Forma: todo lo interactivo es pastilla; tarjetas y paneles, 24px. */
+  --r-card: 24px;
+  --r-inner: 18px;
+  --studio: #eceae6;         /* fondo claro de "estudio" detrás de las fotos */
+  /* Lleva el fondo claro de las fotos de producto a blanco; con multiply ese
+     blanco se funde con --studio y el producto queda flotando. */
+  --studio-filter: brightness(1.13) contrast(1.05);
 
-  --color-accent: #2dd4bf;
-  --color-accent-strong: #14b8a6;
-  --color-danger: #f4664a;
-  --color-danger-strong: #e5493a;
+  --f-display: 'Syncopate', 'Manrope', sans-serif;
+  --f-body: 'Manrope', system-ui, sans-serif;
+  --f-mono: 'JetBrains Mono', ui-monospace, monospace;
+
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-silk: cubic-bezier(0.65, 0, 0.35, 1);
+  --tshadow: 0 1px 2px rgba(5, 5, 10, 0.95), 0 3px 12px rgba(5, 5, 10, 0.78), 0 10px 44px rgba(5, 5, 10, 0.8);
+
+  /* Nombres heredados que usan las demás pantallas, apuntando a la identidad. */
+  --color-bg: var(--canvas);
+  --color-surface: rgba(237, 237, 238, 0.04);
+  --color-surface-strong: rgba(237, 237, 238, 0.08);
+  --color-border: rgba(90, 90, 95, 0.6);
+  --color-text: var(--text-primary);
+  --color-text-muted: var(--text-secondary);
+
+  --color-accent: var(--accent);
+  --color-accent-strong: var(--accent-hover);
+  --color-danger: #e5383b;
+  --color-danger-strong: #c42a2e;
 
   --radius-sm: 8px;
   --radius-md: 14px;
@@ -37,12 +75,14 @@ body {
   padding: 0;
   color: var(--color-text);
   background: var(--color-bg);
-  font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  font-family: var(--f-body);
   -webkit-font-smoothing: antialiased;
 }
 
+html,
 body {
   overflow-x: hidden;
+  overflow-x: clip;
 }
 
 * {
@@ -57,6 +97,7 @@ body {
     animation-duration: 0.001ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.001ms !important;
+    transition-delay: 0ms !important;
   }
 }
 
@@ -101,4 +142,760 @@ body {
   border-radius: 50%;
   animation: spin 0.6s linear infinite;
   vertical-align: -0.15em;
+}
+
+/* ══════════════════ Piezas compartidas de la identidad ══════════════════ */
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+.display {
+  font-family: var(--f-display);
+  font-weight: 400;
+  letter-spacing: 0.02em;
+  line-height: 1.12;
+  margin: 0;
+}
+
+.mono-label {
+  font-family: var(--f-mono);
+  font-size: 0.72rem;
+  font-weight: 400;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+  margin: 0;
+}
+
+a:focus-visible,
+button:focus-visible,
+summary:focus-visible,
+[tabindex]:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 4px;
+}
+
+/* ══════ Vidrio líquido ══════
+   Superficie base: paneles, menú, tarjetas. El brillo sigue al cursor con
+   --mx/--my (los escribe App en un solo listener). */
+.glass {
+  position: relative;
+  isolation: isolate;
+  background: var(--glass-fill);
+  -webkit-backdrop-filter: var(--glass-blur);
+  backdrop-filter: var(--glass-blur);
+  border: 1px solid var(--glass-edge);
+  box-shadow: var(--glass-shadow);
+}
+
+.glass::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  border-radius: inherit;
+  background: radial-gradient(circle at var(--mx, 30%) var(--my, 0%), rgba(255, 255, 255, 0.24), transparent 45%);
+  opacity: 0.6;
+  transition: opacity 400ms var(--ease-out);
+  pointer-events: none;
+}
+
+.glass:hover::before {
+  opacity: 1;
+}
+
+/* ══════ Botones de vidrio ══════
+   Comparten: brillo que sigue al cursor, línea de luz al pasar, hundimiento al
+   clic, onda (span.ripple) y atracción magnética (--pull-x/--pull-y, solo con
+   la directiva appMagnet). */
+.btn,
+.btn-line {
+  --press: 1;
+  --lift: 0px;
+  --pull-x: 0px;
+  --pull-y: 0px;
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6rem;
+  min-height: 46px;
+  border-radius: 999px;
+  font-family: var(--f-mono);
+  text-transform: uppercase;
+  text-decoration: none;
+  text-shadow: none;
+  white-space: nowrap;
+  cursor: pointer;
+  -webkit-backdrop-filter: blur(18px) saturate(170%);
+  backdrop-filter: blur(18px) saturate(170%);
+  transform: translate(var(--pull-x), calc(var(--pull-y) + var(--lift))) scale(var(--press));
+  transition: transform 500ms var(--ease-spring), box-shadow 400ms var(--ease-out), border-color 300ms var(--ease-out), color 300ms var(--ease-out), opacity 300ms var(--ease-out);
+}
+
+.btn::before,
+.btn-line::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  border-radius: inherit;
+  background: radial-gradient(circle at var(--mx, 50%) var(--my, 0%), rgba(255, 255, 255, 0.38), transparent 50%);
+  opacity: 0;
+  transition: opacity 350ms var(--ease-out);
+  pointer-events: none;
+}
+
+.btn::after,
+.btn-line::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: linear-gradient(110deg, transparent 35%, rgba(255, 255, 255, 0.32) 50%, transparent 65%);
+  transform: translateX(-120%);
+  transition: transform 900ms var(--ease-out);
+  pointer-events: none;
+}
+
+.btn:hover:not(:disabled),
+.btn-line:hover:not(:disabled) {
+  --lift: -2px;
+}
+
+.btn:hover:not(:disabled)::before,
+.btn-line:hover:not(:disabled)::before {
+  opacity: 1;
+}
+
+.btn:hover:not(:disabled)::after,
+.btn-line:hover:not(:disabled)::after {
+  transform: translateX(120%);
+}
+
+.btn:active:not(:disabled),
+.btn-line:active:not(:disabled) {
+  --press: 0.96;
+  transition-duration: 120ms;
+}
+
+/* Principal: vidrio teñido de rojo con texto blanco (5.7:1 en su punto más claro). */
+.btn {
+  padding: 0 2rem;
+  font-size: 0.78rem;
+  letter-spacing: 0.2em;
+  color: var(--on-accent);
+  background: linear-gradient(135deg, rgba(255, 110, 110, 0.4), rgba(140, 16, 26, 0.15) 60%), rgba(168, 20, 31, 0.92);
+  border: 1px solid rgba(255, 160, 160, 0.42);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.5), inset 0 -8px 16px rgba(60, 4, 8, 0.35), 0 14px 40px rgba(168, 20, 31, 0.35);
+}
+
+.btn:hover:not(:disabled) {
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.55), inset 0 -8px 16px rgba(60, 4, 8, 0.3), 0 18px 50px rgba(229, 56, 59, 0.45);
+}
+
+.btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Secundario: vidrio claro. */
+.btn-line {
+  padding: 0 1.5rem;
+  font-size: 0.72rem;
+  letter-spacing: 0.18em;
+  color: var(--text-primary);
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.15), rgba(255, 255, 255, 0.03) 60%), rgba(22, 22, 23, 0.38);
+  border: 1px solid var(--glass-edge);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.32), 0 10px 30px rgba(0, 0, 0, 0.35);
+}
+
+.btn-line:hover:not(:disabled) {
+  border-color: rgba(255, 255, 255, 0.34);
+}
+
+.btn-line:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.btn-line.danger:hover:not(:disabled) {
+  border-color: var(--color-danger);
+  color: var(--color-danger);
+}
+
+/* Botón redondo de solo ícono. */
+.btn-icon {
+  width: 46px;
+  padding: 0;
+}
+
+/* Onda al hacer clic (la crea App en el punto del clic). */
+.ripple {
+  position: absolute;
+  z-index: -1;
+  width: 12px;
+  height: 12px;
+  margin: -6px 0 0 -6px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.4);
+  transform: scale(0);
+  animation: ripple 700ms var(--ease-out) forwards;
+  pointer-events: none;
+}
+
+@keyframes ripple {
+  to { transform: scale(28); opacity: 0; }
+}
+
+/* Enlace de texto en mono, para acciones discretas (editar, limpiar filtro). */
+.link-mono {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.3rem 0;
+  background: none;
+  border: 0;
+  border-bottom: 1px solid transparent;
+  color: var(--text-secondary);
+  font-family: var(--f-mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  text-decoration: none;
+  cursor: pointer;
+  transition: color 300ms var(--ease-out), border-color 300ms var(--ease-out);
+}
+
+.link-mono:hover {
+  color: var(--text-primary);
+  border-bottom-color: var(--line-strong);
+}
+
+.link-mono.danger:hover {
+  color: var(--color-danger);
+  border-bottom-color: var(--color-danger);
+}
+
+@media (pointer: coarse) {
+  .btn,
+  .btn-line,
+  .link-mono {
+    min-height: 44px;
+  }
+}
+
+/* Entrada al aparecer en pantalla (ver RevealDirective). */
+.reveal {
+  opacity: 0;
+  transform: translateY(28px);
+  transition: opacity 1100ms var(--ease-out), transform 1100ms var(--ease-out);
+}
+
+.reveal.in {
+  opacity: 1;
+  transform: none;
+}
+
+/* ── Inclinación 3D con brillo (ver TiltDirective) ──
+   Se aplica al marco de la foto, nunca al contenedor que hace la entrada,
+   para que las dos transformaciones no se pisen. */
+.tilt {
+  --press: 1;
+  transform: perspective(1000px) rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg)) scale(var(--press));
+  transition: transform 800ms var(--ease-out), box-shadow 600ms var(--ease-out);
+}
+
+.tilt.tilting {
+  transition-duration: 220ms, 600ms;
+  box-shadow: 0 30px 60px -30px rgba(0, 0, 0, 0.7);
+}
+
+.tilt:active {
+  --press: 0.985;
+}
+
+.tilt::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  pointer-events: none;
+  background: radial-gradient(circle at var(--mx, 50%) var(--my, 50%), rgba(255, 255, 255, 0.55), rgba(255, 255, 255, 0) 55%);
+  mix-blend-mode: soft-light;
+  opacity: 0;
+  transition: opacity 500ms var(--ease-out);
+}
+
+.tilt.tilting::before {
+  opacity: 1;
+}
+
+/* Miniatura que vuela a la bolsa (ver flyToBag). */
+.bag-ghost {
+  position: fixed;
+  z-index: 80;
+  pointer-events: none;
+  border-radius: 50%;
+  background: var(--studio) center / 78% no-repeat;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(196, 196, 200, 0.4);
+  will-change: transform, opacity;
+}
+
+/* ── Paneles flotantes (formularios y confirmaciones) ── */
+.lux-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  display: grid;
+  place-items: center;
+  padding: 1rem;
+  overflow-y: auto;
+  background: rgba(8, 9, 12, 0.72);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  animation: fade-in 300ms var(--ease-out);
+}
+
+.lux-panel {
+  position: relative;
+  width: min(100%, 560px);
+  max-height: calc(100vh - 2rem);
+  overflow-y: auto;
+  padding: clamp(1.5rem, 4vw, 2.6rem);
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.02) 60%), rgba(22, 22, 23, 0.82);
+  -webkit-backdrop-filter: var(--glass-blur);
+  backdrop-filter: var(--glass-blur);
+  border: 1px solid var(--glass-edge);
+  border-radius: var(--r-card);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.25), 0 30px 80px rgba(0, 0, 0, 0.6);
+  color: var(--text-primary);
+  animation: panel-in 500ms var(--ease-spring);
+}
+
+.lux-panel.narrow {
+  width: min(100%, 440px);
+  text-align: center;
+}
+
+@keyframes panel-in {
+  from { opacity: 0; transform: translateY(18px); }
+  to { opacity: 1; transform: none; }
+}
+
+.lux-panel-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1.8rem;
+}
+
+.lux-panel-head .display {
+  font-size: clamp(1.2rem, 2.4vw, 1.6rem);
+  margin-top: 0.6rem;
+}
+
+.lux-close {
+  width: 2.4rem;
+  height: 2.4rem;
+  flex-shrink: 0;
+  display: grid;
+  place-items: center;
+  background: transparent;
+  border: 1px solid var(--line-strong);
+  border-radius: 50%;
+  color: var(--text-secondary);
+  font-size: 1.2rem;
+  line-height: 1;
+  cursor: pointer;
+  transition: color 300ms var(--ease-out), border-color 300ms var(--ease-out), transform 400ms var(--ease-out);
+}
+
+.lux-close:hover {
+  color: var(--text-primary);
+  border-color: var(--text-primary);
+  transform: rotate(90deg);
+}
+
+.lux-panel .lux-panel-text {
+  margin: 1rem auto 0;
+  max-width: 32ch;
+  color: var(--text-secondary);
+}
+
+.lux-panel-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.8rem;
+  margin-top: 2rem;
+}
+
+.btn.danger {
+  background: linear-gradient(135deg, rgba(255, 110, 110, 0.3), transparent 60%), #8f121b;
+}
+
+.btn.danger:hover:not(:disabled) {
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.4), 0 12px 40px rgba(229, 56, 59, 0.35);
+}
+
+/* ── Formularios: campos subrayados con etiqueta mono ── */
+.lux-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  color: var(--text-primary);
+}
+
+.lux-form label {
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+  font-family: var(--f-mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+  transition: color 300ms var(--ease-out);
+}
+
+.lux-form label:focus-within {
+  color: var(--text-primary);
+}
+
+.lux-form input:not([type='file']),
+.lux-form textarea,
+.lux-form select {
+  width: 100%;
+  padding: 0.55rem 0 0.7rem;
+  background: transparent;
+  border: 0;
+  border-bottom: 1px solid var(--line-strong);
+  border-radius: 0;
+  color: var(--text-primary);
+  font-family: var(--f-body);
+  font-size: 1rem;
+  letter-spacing: normal;
+  text-transform: none;
+  transition: border-color 300ms var(--ease-out);
+}
+
+.lux-form input:not([type='file']):focus,
+.lux-form textarea:focus,
+.lux-form select:focus {
+  outline: none;
+  border-bottom-color: var(--accent);
+}
+
+.lux-form input:focus-visible,
+.lux-form textarea:focus-visible,
+.lux-form select:focus-visible {
+  box-shadow: 0 1px 0 0 var(--accent);
+}
+
+.lux-form textarea {
+  min-height: 70px;
+  resize: vertical;
+}
+
+.lux-form select option {
+  background: var(--panel);
+  color: var(--text-primary);
+}
+
+.lux-form .error,
+.lux-form small.error {
+  margin-top: -0.9rem;
+  color: #ffb4a8;
+  font-family: var(--f-body);
+  font-size: 0.85rem;
+  letter-spacing: normal;
+  text-transform: none;
+}
+
+.lux-form .hint {
+  color: var(--text-secondary);
+  font-family: var(--f-body);
+  font-size: 0.85rem;
+  letter-spacing: normal;
+  text-transform: none;
+}
+
+/* Mensaje de estado (cargando, vacío, error) dentro de las pantallas. */
+.lux-state {
+  padding: 4rem 1rem;
+  color: var(--text-secondary);
+  text-align: center;
+}
+
+.lux-state.error {
+  color: #ffb4a8;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .reveal {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* Menos transparencia: el vidrio pasa a superficie sólida. */
+@media (prefers-reduced-transparency: reduce) {
+  .glass,
+  .btn,
+  .btn-line {
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
+
+  .glass,
+  .btn-line {
+    background: var(--panel);
+  }
+
+  .btn {
+    background: var(--accent-deep);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .btn::after,
+  .btn-line::after {
+    display: none;
+  }
+}
+
+/* ══════════════════ Acceso (login y registro) ══════════════════
+   La seda doblada en una vitrina de vidrio a un lado, el formulario al otro. */
+.auth {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  align-items: center;
+  gap: clamp(1.5rem, 4vw, 3rem);
+  max-width: 1180px;
+  margin: 0 auto;
+  padding-block: clamp(1rem, 4vh, 2.5rem);
+}
+
+.auth-art {
+  position: relative;
+  aspect-ratio: 1 / 0.92;
+  border-radius: 34px;
+  overflow: hidden;
+  animation: auth-in 1100ms var(--ease-out) both;
+}
+
+/* Doble clase: el :host del componente (position: relative) no debe ganarle. */
+.auth-art .auth-silk {
+  position: absolute;
+  inset: 0;
+}
+
+.auth-sheen {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background:
+    radial-gradient(ellipse 60% 30% at 35% 8%, rgba(255, 255, 255, 0.2), transparent 70%),
+    linear-gradient(200deg, transparent 55%, rgba(229, 56, 59, 0.12));
+  pointer-events: none;
+}
+
+.auth-card {
+  padding: clamp(1.5rem, 3.4vw, 2.6rem);
+  border-radius: 30px;
+  animation: auth-in 1100ms var(--ease-out) 150ms both;
+}
+
+@keyframes auth-in {
+  from { opacity: 0; transform: translateY(24px) scale(0.98); }
+}
+
+.auth-card .display {
+  font-size: clamp(1.4rem, 3vw, 2rem);
+}
+
+/* Interruptor Entrar / Crear cuenta con pastilla de vidrio. */
+.auth-switch {
+  position: relative;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  margin-top: 1.4rem;
+  padding: 4px;
+  border-radius: 999px;
+}
+
+.auth-switch a {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  place-items: center;
+  min-height: 42px;
+  color: var(--text-secondary);
+  font-family: var(--f-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  text-decoration: none;
+  transition: color 300ms;
+}
+
+.auth-switch a.on,
+.auth-switch a:hover {
+  color: var(--text-primary);
+}
+
+.auth-thumb {
+  position: absolute;
+  top: 4px;
+  bottom: 4px;
+  left: 4px;
+  width: calc(50% - 4px);
+  border-radius: 999px;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.22), rgba(255, 255, 255, 0.05));
+  border: 1px solid rgba(255, 255, 255, 0.24);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.4), 0 6px 18px rgba(0, 0, 0, 0.35);
+  animation: thumb-in 600ms var(--ease-spring) both;
+}
+
+.auth-switch.is-second .auth-thumb {
+  transform: translateX(100%);
+  animation-name: thumb-in-second;
+}
+
+@keyframes thumb-in {
+  from { transform: translateX(100%); }
+}
+
+@keyframes thumb-in-second {
+  from { transform: translateX(0); }
+  to { transform: translateX(100%); }
+}
+
+.auth-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  margin-top: 1.6rem;
+}
+
+.auth-form .btn {
+  width: 100%;
+  margin-top: 0.4rem;
+}
+
+.auth-error {
+  margin: 1.2rem 0 0;
+  padding: 0.85rem 1rem;
+  border-left: 2px solid var(--color-danger);
+  border-radius: 10px;
+  background: rgba(229, 56, 59, 0.1);
+  color: #ffb4b4;
+  font-size: 0.92rem;
+}
+
+.field-error {
+  margin-top: -0.5rem;
+  color: #ffb4b4;
+  font-size: 0.85rem;
+}
+
+/* Campo con etiqueta que sube al escribir o al enfocar. */
+.float-field {
+  position: relative;
+}
+
+.float-field input {
+  width: 100%;
+  min-height: 58px;
+  padding: 1.4rem 3rem 0.5rem 1.1rem;
+  border: 1px solid var(--glass-edge);
+  border-radius: 16px;
+  background: rgba(11, 11, 12, 0.55);
+  color: var(--text-primary);
+  font: inherit;
+  font-size: 1rem;
+  transition: border-color 300ms, box-shadow 300ms;
+}
+
+.float-field input:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 4px rgba(229, 56, 59, 0.18);
+}
+
+.float-field label {
+  position: absolute;
+  left: 1.1rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--text-secondary);
+  font-size: 0.95rem;
+  pointer-events: none;
+  transition: top 350ms var(--ease-out), transform 350ms var(--ease-out), font-size 350ms var(--ease-out);
+}
+
+.float-field input:focus + label,
+.float-field input:not(:placeholder-shown) + label {
+  top: 0.95rem;
+  transform: none;
+  font-size: 0.72rem;
+  letter-spacing: 0.06em;
+}
+
+.float-field .peek {
+  position: absolute;
+  right: 0.5rem;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 40px;
+  height: 40px;
+  display: grid;
+  place-items: center;
+  border: 0;
+  border-radius: 50%;
+  background: none;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: color 300ms;
+}
+
+.float-field .peek:hover {
+  color: var(--text-primary);
+}
+
+.float-field .peek svg {
+  width: 18px;
+  height: 18px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+@media (max-width: 860px) {
+  .auth {
+    grid-template-columns: 1fr;
+  }
+
+  .auth-art {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .auth-art,
+  .auth-card,
+  .auth-thumb {
+    animation: none;
+  }
 }

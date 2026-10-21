@@ -1,0 +1,97 @@
+<section class="equipo">
+  <header class="eq-head" appReveal>
+    <div>
+      <p class="mono-label">Panel · Cuentas</p>
+      <h2 class="display">{{ vista() === 'equipo' ? 'Tu equipo' : 'Clientes registrados' }}</h2>
+    </div>
+    <button type="button" class="btn" (click)="abrirFormulario()">Nuevo trabajador</button>
+  </header>
+
+  <nav class="chips" aria-label="Tipo de cuenta">
+    <button type="button" class="chip" [class.on]="vista() === 'equipo'" [attr.aria-pressed]="vista() === 'equipo'" (click)="vista.set('equipo')">
+      Equipo · {{ equipo().length }}
+    </button>
+    <button type="button" class="chip" [class.on]="vista() === 'clientes'" [attr.aria-pressed]="vista() === 'clientes'" (click)="vista.set('clientes')">
+      Clientes · {{ clientes().length }}
+    </button>
+  </nav>
+
+  @if (vista() === 'clientes') {
+    <p class="note">Las personas que se registran en la tienda quedan como clientes: pueden comprar, pero no entran al panel.</p>
+  }
+
+  @if (cargando()) {
+    <p class="lux-state">Cargando cuentas…</p>
+  } @else if (error()) {
+    <p class="lux-state error">{{ error() }}</p>
+  } @else {
+    <div class="table-wrap" appReveal>
+      <table class="accounts">
+        <thead>
+          <tr>
+            <th scope="col">Usuario</th>
+            <th scope="col">Correo</th>
+            <th scope="col">Rol</th>
+            <th scope="col"><span class="sr-only">Acciones</span></th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (user of visibles(); track user.id) {
+            <tr>
+              <th scope="row">
+                {{ user.username }}
+                @if (esYo(user)) {
+                  <span class="me">Tú</span>
+                }
+              </th>
+              <td class="email">{{ user.email }}</td>
+              <td>
+                <span class="role" [attr.data-role]="user.role">{{ roleLabel(user.role) }}</span>
+              </td>
+              <td class="actions">
+                @if (puedeEliminar(user)) {
+                  <button type="button" class="link-mono danger" (click)="eliminar(user.id)">Eliminar</button>
+                }
+              </td>
+            </tr>
+          } @empty {
+            <tr>
+              <td colspan="4" class="empty">
+                {{ vista() === 'equipo' ? 'Todavía no hay trabajadores.' : 'Todavía no hay clientes registrados.' }}
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+</section>
+
+@if (mostrarFormulario()) {
+  <div class="lux-backdrop" (click)="cerrarFormulario()">
+    <section class="lux-panel" role="dialog" aria-modal="true" aria-labelledby="new-user-title" (click)="$event.stopPropagation()">
+      <div class="lux-panel-head">
+        <div>
+          <p class="mono-label">Equipo</p>
+          <h2 id="new-user-title" class="display">Nuevo trabajador</h2>
+        </div>
+        <button type="button" class="lux-close" aria-label="Cerrar" (click)="cerrarFormulario()">&times;</button>
+      </div>
+      <app-user-form (saved)="usuarioGuardado()" (closed)="cerrarFormulario()" />
+    </section>
+  </div>
+}
+
+@if (usuarioAEliminar() !== null) {
+  <div class="lux-backdrop" (click)="cancelarEliminacion()">
+    <section class="lux-panel narrow" role="alertdialog" aria-modal="true" aria-labelledby="delete-user-title" aria-describedby="delete-user-text" (click)="$event.stopPropagation()">
+      <p class="mono-label">Confirmar</p>
+      <h2 id="delete-user-title" class="display">¿Eliminar esta cuenta?</h2>
+      <p id="delete-user-text" class="lux-panel-text">La persona ya no podrá iniciar sesión. Sus ventas registradas se conservan.</p>
+      <div class="lux-panel-actions">
+        <button type="button" class="btn-line" (click)="cancelarEliminacion()">Cancelar</button>
+        <button type="button" class="btn danger" (click)="confirmarEliminacion()">Eliminar</button>
+      </div>
+    </section>
+  </div>
+}

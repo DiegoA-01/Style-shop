@@ -20,6 +20,7 @@ import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import com.proyecto.diego.security.CustomUserDetailsService;
+import com.proyecto.diego.security.JsonAccessDeniedHandler;
 import com.proyecto.diego.security.JsonAuthenticationEntryPoint;
 import com.proyecto.diego.security.JwtAuthenticationFilter;
 
@@ -29,8 +30,16 @@ import lombok.RequiredArgsConstructor;
  * Reemplaza al antiguo CorsConfig: con Spring Security en el classpath,
  * el CORS y las reglas de autorización de rutas se configuran juntos aquí.
  *
- * Todo pasa por /auth/** libremente (login/register); todo lo demás
- * requiere un JWT válido en el header Authorization.
+ * Reglas de acceso (roles fijos, ver Role):
+ * - Públicos: /auth/login, /auth/register, los GET de /product y /category,
+ *   y POST /orders (el pedido web nace PENDIENTE). El registro público siempre
+ *   crea cuentas USUARIO; nadie puede auto-asignarse un rol de personal.
+ * - Catálogo (crear/editar/eliminar productos y categorías, subir imágenes):
+ *   TRABAJADOR ("Empleado") o SUPER_ADMIN.
+ * - Ventas (ver pedidos, cobrar, anular, vender en mostrador): CAJERO o SUPER_ADMIN.
+ * - Cuentas (/users/**) y estadísticas (/reports/**): solo SUPER_ADMIN.
+ * Un USUARIO autenticado no tiene ninguno de estos permisos: ve el catálogo
+ * igual que un visitante.
  */
 @Configuration
 @EnableWebSecurity
@@ -40,6 +49,7 @@ public class SecurityConfig {
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
     private final CustomUserDetailsService userDetailsService;
     private final JsonAuthenticationEntryPoint authenticationEntryPoint;
+    private final JsonAccessDeniedHandler accessDeniedHandler;
 
     @Bean
     public PasswordEncoder passwordEncoder() {
@@ -59,13 +69,29 @@ public class SecurityConfig {
             .csrf(csrf -> csrf.disable())
             .cors(cors -> cors.configurationSource(corsConfigurationSource()))
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-            .exceptionHandling(ex -> ex.authenticationEntryPoint(authenticationEntryPoint))
+            .exceptionHandling(ex -> ex
+                .authenticationEntryPoint(authenticationEntryPoint)
+                .accessDeniedHandler(accessDeniedHandler)
+            )
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-                .requestMatchers("/auth/**").permitAll()
+                // Spring reenvía los errores (p. ej. validación fallida) a /error: si esa
+                // ruta exigiera sesión, un 400 de datos inválidos llegaría como 401.
+                .requestMatchers("/error").permitAll()
+                .requestMatchers(HttpMethod.POST, "/auth/login", "/auth/register").permitAll()
                 // Las imágenes son <img src="..."> servidas directamente por el navegador:
                 // nunca llevan el header Authorization, así que no pueden exigir JWT.
                 .requestMatchers("/uploads/**").permitAll()
+                // Catálogo público: cualquiera puede ver productos y categorías sin cuenta.
+                .requestMatchers(HttpMethod.GET, "/product/**", "/category/**").permitAll()
+                // Checkout público: cualquier visitante puede confirmar un pedido sin cuenta.
+                .requestMatchers(HttpMethod.POST, "/orders").permitAll()
+                // Ventas: la cola de pedidos, cobrar, anular y vender en mostrador.
+                .requestMatchers("/orders", "/orders/**").hasAnyRole("CAJERO", "SUPER_ADMIN")
+                // Administrar el catálogo (incluye /product/upload-image).
+                .requestMatchers("/product/**", "/category/**").hasAnyRole("TRABAJADOR", "SUPER_ADMIN")
+                // Gestión de cuentas y estadísticas de venta: exclusivas del super admin.
+                .requestMatchers("/users/**", "/reports/**").hasRole("SUPER_ADMIN")
                 .anyRequest().authenticated()
             )
             .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);

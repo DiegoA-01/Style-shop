@@ -1,0 +1,27 @@
+<div class="orbit-stage">
+  <div class="tilt-box">
+    <div class="ring">
+      @for (shirt of shirts; track shirt.src; let i = $index) {
+        <figure class="shirt">
+          <img [src]="shirt.src" [alt]="shirt.alt" draggable="false" [attr.loading]="i < 3 ? 'eager' : 'lazy'">
+          <span class="shade" aria-hidden="true"></span>
+        </figure>
+      }
+    </div>
+  </div>
+  <span class="floor" aria-hidden="true"></span>
+</div>
+<div class="orbit-ui">
+  <button class="btn-line btn-icon" type="button" aria-label="Camisa anterior" (click)="anterior()">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 6l-6 6 6 6" /></svg>
+  </button>
+  <div class="caption glass" aria-live="polite">
+    <span class="swap">
+      <strong>{{ frontName() }}</strong>
+      <span>{{ frontNote() }}</span>
+    </span>
+  </div>
+  <button class="btn-line btn-icon" type="button" aria-label="Camisa siguiente" (click)="siguiente()">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6" /></svg>
+  </button>
+</div>

@@ -1,0 +1,199 @@
+:host {
+  --r: 360px;
+  --cw: 230px;
+  --ch: 310px;
+  position: relative;
+  display: block;
+  min-width: 0;
+  animation: orbit-in 1400ms var(--ease-out) 150ms both;
+}
+
+@keyframes orbit-in {
+  from { opacity: 0; transform: scale(0.92) translateY(20px); }
+}
+
+.orbit-stage {
+  position: relative;
+  height: calc(var(--ch) + 150px);
+  perspective: 1500px;
+  perspective-origin: 50% 40%;
+  touch-action: pan-y;
+  cursor: grab;
+  user-select: none;
+}
+
+.orbit-stage.dragging {
+  cursor: grabbing;
+}
+
+.tilt-box {
+  position: absolute;
+  inset: 0;
+  transform-style: preserve-3d;
+  transform: rotateX(var(--tx, -6deg)) rotateY(var(--ty, 0deg));
+  transition: transform 900ms var(--ease-out);
+}
+
+.ring {
+  position: absolute;
+  left: 50%;
+  top: 46%;
+  transform-style: preserve-3d;
+  will-change: transform;
+}
+
+.shirt {
+  position: absolute;
+  width: var(--cw);
+  height: var(--ch);
+  margin: calc(var(--ch) / -2) 0 0 calc(var(--cw) / -2);
+  border-radius: var(--r-card);
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.35), 0 30px 60px rgba(0, 0, 0, 0.55);
+  background: #1b1b1c;
+}
+
+.shirt img {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: cover;
+  pointer-events: none;
+}
+
+/* Oscurece las camisas que quedan atrás (opacidad desde el componente). */
+.shade {
+  position: absolute;
+  inset: 0;
+  background: var(--canvas);
+  opacity: var(--shade, 0);
+  pointer-events: none;
+}
+
+/* Reflejo de vidrio. */
+.shirt::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  background: linear-gradient(115deg, rgba(255, 255, 255, 0.26), transparent 32%, transparent 70%, rgba(255, 110, 110, 0.14));
+  pointer-events: none;
+}
+
+/* Línea holográfica que escanea la camisa del frente. */
+.shirt::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  height: 22%;
+  z-index: 3;
+  background: linear-gradient(180deg, transparent, rgba(255, 110, 110, 0.5) 50%, rgba(237, 237, 238, 0.2) 56%, transparent);
+  mix-blend-mode: screen;
+  opacity: 0;
+  transform: translateY(-110%);
+  pointer-events: none;
+}
+
+.shirt.front {
+  border-color: rgba(229, 56, 59, 0.75);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.45), 0 0 0 1px rgba(229, 56, 59, 0.35), 0 40px 80px rgba(60, 4, 8, 0.6);
+}
+
+.shirt.front::after {
+  opacity: 1;
+  animation: scan 2.8s var(--ease-out) infinite;
+}
+
+@keyframes scan {
+  to { transform: translateY(560%); }
+}
+
+/* Piso de luz bajo el anillo. */
+.floor {
+  position: absolute;
+  left: 8%;
+  right: 8%;
+  bottom: 10px;
+  height: 90px;
+  border-radius: 50%;
+  background: radial-gradient(ellipse at 50% 50%, rgba(229, 56, 59, 0.32), rgba(229, 56, 59, 0.05) 55%, transparent 72%);
+  filter: blur(6px);
+  transform: rotateX(70deg);
+  animation: floor-pulse 5s ease-in-out infinite alternate;
+  pointer-events: none;
+}
+
+@keyframes floor-pulse {
+  to { opacity: 0.55; transform: rotateX(70deg) scale(1.08); }
+}
+
+.orbit-ui {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  margin-top: 0.4rem;
+}
+
+.orbit-ui svg {
+  width: 1.1rem;
+  height: 1.1rem;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.caption {
+  min-width: 12rem;
+  padding: 0.6rem 1.1rem;
+  border-radius: 999px;
+  text-align: center;
+}
+
+.swap {
+  display: block;
+}
+
+.swap strong {
+  display: block;
+  font-weight: 600;
+  font-size: 0.95rem;
+}
+
+.swap span {
+  color: var(--text-secondary);
+  font-size: 0.78rem;
+}
+
+@media (max-width: 960px) {
+  :host {
+    --r: 300px;
+    --cw: 200px;
+    --ch: 270px;
+  }
+}
+
+@media (max-width: 620px) {
+  :host {
+    --r: 230px;
+    --cw: 160px;
+    --ch: 220px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :host,
+  .floor,
+  .shirt.front::after {
+    animation: none;
+  }
+
+  .shirt.front::after {
+    opacity: 0;
+  }
+}

@@ -1,0 +1,970 @@
+:host {
+  /* Estados de pedido (paleta de estado de la guía de dataviz): siempre con
+     punto + palabra, nunca el color solo. */
+  --st-good: #0ca30c;
+  --st-warning: #fab219;
+  --st-critical: #d03b3b;
+  display: block;
+}
+
+.panel {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding-bottom: clamp(3rem, 8vh, 5rem);
+}
+
+/* Entradas escalonadas (la clase .reveal la pone RevealDirective). Van con
+   más especificidad que .card y .q-card, cuyas transiciones reiniciarían el retraso. */
+.panel .reveal {
+  transition-delay: calc(var(--i, 0) * 110ms);
+}
+
+.panel .reveal.settled {
+  transition-delay: 0ms;
+}
+
+/* ══════════ Encabezado con la seda ══════════ */
+.hero-band {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr);
+  align-items: center;
+  gap: 2rem;
+  min-height: clamp(220px, 30vh, 300px);
+  margin-top: clamp(0.5rem, 2vh, 1.5rem);
+  overflow: hidden;
+  border-bottom: 1px solid var(--line);
+}
+
+.hb-copy {
+  position: relative;
+  z-index: 1;
+  padding: 1.5rem 0 2rem;
+}
+
+.hb-copy .display {
+  margin-top: 1rem;
+  font-size: clamp(1.6rem, 3.6vw, 3rem);
+  /* Resguardo: ningún nombre se sale de la pantalla. */
+  overflow-wrap: anywhere;
+}
+
+.lede {
+  margin: 1rem 0 0;
+  max-width: 52ch;
+  color: var(--text-secondary);
+  font-size: 1.02rem;
+}
+
+.lede strong {
+  color: var(--text-primary);
+  font-weight: 600;
+}
+
+.hb-silk {
+  align-self: stretch;
+  min-height: 220px;
+  /* La seda se funde con el fondo por los bordes. */
+  -webkit-mask-image: radial-gradient(ellipse 70% 80% at 55% 45%, #000 45%, transparent 100%);
+  mask-image: radial-gradient(ellipse 70% 80% at 55% 45%, #000 45%, transparent 100%);
+}
+
+/* ══════════ Barra de secciones ══════════ */
+.sec-nav {
+  position: sticky;
+  top: var(--nav-h, 74px);
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.7rem 0;
+  margin-bottom: clamp(1.5rem, 3vw, 2.5rem);
+  background: linear-gradient(180deg, rgba(11, 11, 12, 0.92), rgba(11, 11, 12, 0.75));
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--line);
+}
+
+.sec-links {
+  display: flex;
+  gap: 0.2rem;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.sec-links a {
+  position: relative;
+  flex-shrink: 0;
+  padding: 0.6rem 0.9rem;
+  color: var(--text-secondary);
+  font-family: var(--f-mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  text-decoration: none;
+  transition: color 300ms var(--ease-out);
+}
+
+.sec-links a::after {
+  content: '';
+  position: absolute;
+  left: 0.9rem;
+  right: 0.9rem;
+  bottom: 0.2rem;
+  height: 1px;
+  background: var(--accent);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 500ms var(--ease-out);
+}
+
+.sec-links a:hover {
+  color: var(--text-primary);
+}
+
+.sec-links a.on {
+  color: var(--text-primary);
+}
+
+.sec-links a.on::after {
+  transform: scaleX(1);
+}
+
+.btn.small {
+  flex-shrink: 0;
+  padding: 0.7rem 1.3rem;
+  font-size: 0.68rem;
+}
+
+/* ══════════ Bloques ══════════ */
+.block {
+  display: flex;
+  flex-direction: column;
+  gap: clamp(1.25rem, 2.5vw, 2rem);
+  margin-bottom: clamp(3rem, 7vh, 5rem);
+  scroll-margin-top: calc(var(--nav-h, 74px) + 4.5rem);
+  outline: none;
+}
+
+.block-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  flex-wrap: wrap;
+  gap: 1rem 1.5rem;
+}
+
+.block-title {
+  margin: 0.6rem 0 0;
+  font-family: var(--f-display);
+  font-weight: 400;
+  font-size: clamp(1.3rem, 2.6vw, 2rem);
+  letter-spacing: 0.02em;
+}
+
+.head-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+}
+
+/* ══════════ Cifras ══════════ */
+.stats {
+  display: grid;
+  grid-template-columns: 2fr repeat(3, 1fr);
+  gap: 1px;
+  background: var(--line);
+  border: 1px solid var(--line);
+  border-radius: var(--r-card);
+  overflow: hidden;
+  transition: opacity 300ms ease;
+}
+
+.stat {
+  position: relative;
+  padding: clamp(1.2rem, 2.2vw, 1.8rem);
+  background: var(--panel);
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  gap: 0.45rem;
+  min-height: 150px;
+}
+
+.stat-label {
+  margin: 0;
+  color: var(--text-secondary);
+  font-size: 0.85rem;
+}
+
+/* Cifra principal: una sola por vista, en la letra de texto (no la de títulos). */
+.hero-value {
+  margin: 0;
+  font-family: var(--f-body);
+  font-weight: 600;
+  font-size: clamp(2.4rem, 4.6vw, 3.8rem);
+  line-height: 1.05;
+  letter-spacing: -0.01em;
+}
+
+.stat-value {
+  margin: 0;
+  font-weight: 600;
+  font-size: clamp(1.25rem, 1.9vw, 1.6rem);
+}
+
+.stat-sub {
+  margin: 0;
+  color: var(--text-secondary);
+  font-size: 0.86rem;
+}
+
+.stat-sub:first-letter {
+  text-transform: uppercase;
+}
+
+.hero-foot {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.6rem 1.2rem;
+}
+
+/* Variación: la flecha lleva el color; el texto se queda en tinta de texto. */
+.delta {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.3rem 0.7rem;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  color: var(--text-primary);
+  font-size: 0.8rem;
+}
+
+.delta svg {
+  width: 0.7rem;
+  height: 0.7rem;
+}
+
+.delta.up svg { fill: var(--st-good); }
+.delta.down svg { fill: var(--st-critical); }
+
+/* Línea de acento que se dibuja bajo la cifra principal. */
+.stat-line {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 2px;
+  background: linear-gradient(90deg, var(--accent), transparent);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 1400ms var(--ease-out) 300ms;
+}
+
+.hero-stat.in .stat-line {
+  transform: scaleX(1);
+}
+
+.loading {
+  opacity: 0.5;
+}
+
+/* ══════════ Accesos rápidos ══════════ */
+.quick {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+.q-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.35rem;
+  padding: 1.2rem 1.3rem 1.3rem;
+  background: transparent;
+  border: 1px solid var(--line);
+  border-radius: var(--r-card);
+  color: var(--text-primary);
+  font: inherit;
+  text-align: left;
+  text-decoration: none;
+  cursor: pointer;
+  overflow: hidden;
+  transition: opacity 1100ms var(--ease-out), transform 1100ms var(--ease-out), border-color 400ms var(--ease-out);
+}
+
+/* Barrido de luz al pasar el cursor. */
+.q-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(120deg, transparent 30%, rgba(229, 56, 59, 0.1) 50%, transparent 70%);
+  transform: translateX(-100%);
+  transition: transform 900ms var(--ease-out);
+  pointer-events: none;
+}
+
+.q-card:hover,
+.q-card:focus-visible {
+  border-color: var(--line-strong);
+}
+
+.q-card.settled:hover {
+  transform: translateY(-3px);
+}
+
+.q-card:hover::before {
+  transform: translateX(100%);
+}
+
+.q-card svg {
+  width: 2rem;
+  height: 2rem;
+  margin-bottom: 0.6rem;
+  fill: none;
+  stroke: var(--silver);
+  stroke-width: 1.3;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  transition: stroke 400ms var(--ease-out);
+}
+
+.q-card:hover svg {
+  stroke: var(--accent);
+}
+
+.q-title {
+  font-weight: 600;
+}
+
+.q-hint {
+  color: var(--text-secondary);
+  font-size: 0.85rem;
+}
+
+/* ══════════ El día ══════════ */
+.stepper {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.step {
+  width: 2.4rem;
+  height: 2.4rem;
+  display: grid;
+  place-items: center;
+  background: transparent;
+  border: 1px solid var(--line-strong);
+  border-radius: 50%;
+  color: var(--text-primary);
+  cursor: pointer;
+  transition: border-color 300ms var(--ease-out), transform 300ms var(--ease-out);
+}
+
+.step svg {
+  width: 0.9rem;
+  height: 0.9rem;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.step:hover:not(:disabled) {
+  border-color: var(--accent);
+}
+
+.step:active:not(:disabled) {
+  transform: scale(0.94);
+}
+
+.step:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+.chip {
+  padding: 0.55rem 1rem;
+  background: transparent;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  color: var(--text-secondary);
+  font-family: var(--f-mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: border-color 300ms var(--ease-out), color 300ms var(--ease-out);
+}
+
+.chip:hover {
+  border-color: var(--line-strong);
+  color: var(--text-primary);
+}
+
+.chip.on {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.date input,
+.year select {
+  padding: 0.55rem 0.9rem;
+  background: var(--panel);
+  border: 1px solid var(--line-strong);
+  border-radius: 999px;
+  color: var(--text-primary);
+  font-family: var(--f-mono);
+  font-size: 0.75rem;
+  color-scheme: dark;
+}
+
+.date input:focus-visible,
+.year select:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.year {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+}
+
+.two-col {
+  display: grid;
+  grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
+  gap: clamp(1.25rem, 2.5vw, 2rem);
+}
+
+.card {
+  min-width: 0;
+  padding: clamp(1.2rem, 2.2vw, 1.8rem);
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: var(--r-card);
+  transition: opacity 1100ms var(--ease-out), transform 1100ms var(--ease-out), border-color 400ms ease;
+}
+
+.card:hover {
+  border-color: #454955;
+}
+
+.card-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1rem;
+  margin-bottom: 1.4rem;
+}
+
+.card-title {
+  margin: 0.6rem 0 0;
+  font-size: 1.15rem;
+  font-weight: 600;
+}
+
+.card-figure {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.2rem;
+}
+
+.card-figure strong {
+  font-size: 1.3rem;
+  font-weight: 600;
+}
+
+/* Estado vacío con un ícono que se dibuja solo. */
+.empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.8rem;
+  padding: 1.8rem 0 1.2rem;
+  color: var(--text-secondary);
+  text-align: center;
+}
+
+.empty p {
+  margin: 0;
+}
+
+.empty svg {
+  width: 3rem;
+  height: 3rem;
+  fill: none;
+  stroke: var(--line-strong);
+  stroke-width: 1.3;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.empty-draw {
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  transition: stroke-dashoffset 1600ms var(--ease-silk) 400ms;
+}
+
+.card.in .empty-draw {
+  stroke-dashoffset: 0;
+}
+
+.empty-text {
+  margin: 0;
+  padding: 2rem 0;
+  color: var(--text-secondary);
+  text-align: center;
+}
+
+/* Filas que entran en cascada cuando aparece la tarjeta. */
+.card.in .data tbody tr,
+.card.in .orders li,
+.card.in .ranking li {
+  animation: row-in 700ms var(--ease-out) both;
+  animation-delay: calc(200ms + min(var(--r, 0), 12) * 55ms);
+}
+
+@keyframes row-in {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: none; }
+}
+
+.table-wrap {
+  overflow-x: auto;
+  margin: 0 calc(-1 * clamp(1.2rem, 2.2vw, 1.8rem));
+  padding: 0 clamp(1.2rem, 2.2vw, 1.8rem);
+}
+
+.data {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+}
+
+.data th,
+.data td {
+  padding: 0.75rem 0.5rem;
+  border-bottom: 1px solid var(--line);
+  text-align: left;
+  white-space: nowrap;
+}
+
+.data thead th {
+  color: var(--text-secondary);
+  font-family: var(--f-mono);
+  font-size: 0.64rem;
+  font-weight: 400;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+.data tbody th {
+  font-weight: 500;
+  white-space: normal;
+}
+
+.data tbody tr {
+  transition: background-color 250ms ease;
+}
+
+.data tbody tr:hover {
+  background: rgba(237, 237, 238, 0.03);
+}
+
+.data tfoot th,
+.data tfoot td {
+  border-bottom: 0;
+  padding-top: 1rem;
+  font-weight: 600;
+}
+
+.num {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.data .num {
+  text-align: right;
+}
+
+.strong {
+  font-weight: 600;
+}
+
+.muted {
+  color: var(--text-secondary);
+}
+
+.mono {
+  font-family: var(--f-mono);
+  font-size: 0.72rem;
+  color: var(--text-secondary);
+}
+
+/* ── Estados de pedido ── */
+.status {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  color: var(--text-primary);
+  font-family: var(--f-mono);
+  font-size: 0.66rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.status::before {
+  content: '';
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--line-strong);
+}
+
+.status[data-status='PAGADA']::before { background: var(--st-good); }
+.status[data-status='PENDIENTE']::before { background: var(--st-warning); }
+.status[data-status='ANULADA']::before { background: var(--st-critical); }
+
+.status-summary {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem 1.2rem;
+  margin: 0 0 1rem;
+}
+
+.orders {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.orders li {
+  position: relative;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.85rem 0 0.85rem 0.9rem;
+  border-top: 1px solid var(--line);
+}
+
+/* Los pendientes llevan una marca a la izquierda: son lo que falta cobrar. */
+.orders li::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0.85rem;
+  bottom: 0.85rem;
+  width: 2px;
+  background: var(--line);
+}
+
+.orders li.pending::before {
+  background: var(--st-warning);
+}
+
+.order-main,
+.order-side {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  min-width: 0;
+}
+
+.order-side {
+  align-items: flex-end;
+}
+
+.order-main strong {
+  font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.order-main .muted {
+  font-size: 0.85rem;
+}
+
+/* ══════════ Tendencia ══════════ */
+.wide {
+  width: 100%;
+}
+
+.chart-note {
+  margin: 1.2rem 0 0;
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+  max-width: 70ch;
+}
+
+.chart-note strong {
+  color: var(--text-primary);
+  font-weight: 600;
+}
+
+.single-year {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding: 1rem 0 0.5rem;
+}
+
+.extremes {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+  margin-bottom: 1.4rem;
+}
+
+.extreme {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  padding: 1rem 1.1rem;
+  border: 1px solid var(--line);
+  border-left: 2px solid var(--line-strong);
+  border-radius: var(--r-card);
+}
+
+.extreme.best {
+  border-left-color: var(--accent);
+}
+
+.extreme-name {
+  margin: 0;
+  font-size: 1.05rem;
+  font-weight: 600;
+}
+
+.ranking {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.ranking li {
+  display: grid;
+  grid-template-columns: 2rem minmax(0, 1fr) minmax(40px, 90px) auto auto;
+  align-items: center;
+  gap: 0.8rem;
+  padding: 0.6rem 0;
+  border-top: 1px solid var(--line);
+  font-size: 0.9rem;
+}
+
+.rank-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Proporción de unidades frente al más vendido: crece al aparecer. */
+.rank-meter {
+  position: relative;
+  height: 4px;
+  border-radius: var(--r-card);
+  background: #262628;
+  overflow: hidden;
+}
+
+.rank-meter span {
+  position: absolute;
+  inset: 0;
+  background: var(--accent);
+  border-radius: var(--r-card);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 1200ms var(--ease-out) 500ms;
+}
+
+.card.in .rank-meter span {
+  transform: scaleX(var(--w, 0));
+}
+
+.year-facts {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1px;
+  margin: 1.4rem 0 0;
+  background: var(--line);
+  border: 1px solid var(--line);
+  border-radius: var(--r-card);
+  overflow: hidden;
+}
+
+.year-facts div {
+  padding: 0.9rem 1rem;
+  background: var(--panel);
+}
+
+.year-facts dt {
+  color: var(--text-secondary);
+  font-size: 0.8rem;
+}
+
+.year-facts dd {
+  margin: 0.3rem 0 0;
+  font-weight: 600;
+  font-size: 1.1rem;
+}
+
+.year-facts dd:first-letter {
+  text-transform: uppercase;
+}
+
+/* ══════════ Equipo ══════════ */
+.team {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 1px;
+  background: var(--line);
+  border: 1px solid var(--line);
+  border-radius: var(--r-card);
+  overflow: hidden;
+}
+
+.team-cell {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  padding: 1.4rem 1.5rem;
+  background: var(--panel);
+}
+
+.team-num {
+  margin: 0.4rem 0 0.2rem;
+  font-weight: 600;
+  font-size: 2rem;
+  line-height: 1;
+}
+
+.role-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--line-strong);
+}
+
+.role-dot[data-role='SUPER_ADMIN'] { background: var(--accent); }
+.role-dot[data-role='CAJERO'] { background: var(--silver); }
+.role-dot[data-role='TRABAJADOR'] { background: #7d7d82; }
+
+/* ══════════ Responsive ══════════ */
+@media (max-width: 1100px) {
+  .stats {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  .hero-stat {
+    grid-column: 1 / -1;
+  }
+
+  .two-col {
+    grid-template-columns: 1fr;
+  }
+
+  .quick,
+  .team {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 720px) {
+  .hero-band {
+    grid-template-columns: 1fr;
+    min-height: 0;
+  }
+
+  /* En celular la seda pasa detrás del texto, tenue. */
+  .hb-silk {
+    position: absolute;
+    inset: 0 -20% 0 30%;
+    opacity: 0.45;
+    min-height: 0;
+  }
+
+  .sec-nav .btn.small {
+    display: none;
+  }
+}
+
+@media (max-width: 560px) {
+  .stats,
+  .quick,
+  .team,
+  .extremes {
+    grid-template-columns: 1fr;
+  }
+
+  .ranking li {
+    grid-template-columns: 1.8rem minmax(0, 1fr) auto auto;
+  }
+
+  .rank-meter {
+    display: none;
+  }
+
+  /* En celular la tabla del día deja fuera canal y pago para no desbordarse. */
+  .data th:last-child,
+  .data td:last-child {
+    display: none;
+  }
+}
+
+/* ── Esqueleto de carga ── */
+.skeleton .bar {
+  display: block;
+  height: 0.9rem;
+  border-radius: var(--r-card);
+  background: linear-gradient(100deg, var(--panel) 30%, #222224 50%, var(--panel) 70%);
+  background-size: 300% 100%;
+  animation: shimmer 1.8s ease-in-out infinite;
+}
+
+.skeleton .bar.short {
+  width: 40%;
+  height: 2.2rem;
+}
+
+@keyframes shimmer {
+  from { background-position: 100% 0; }
+  to { background-position: 0 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .stat-line,
+  .rank-meter span {
+    transition: none;
+  }
+
+  .hero-stat .stat-line {
+    transform: scaleX(1);
+  }
+
+  .rank-meter span {
+    transform: scaleX(var(--w, 0));
+  }
+
+  .empty-draw {
+    stroke-dashoffset: 0;
+  }
+
+  .card.in .data tbody tr,
+  .card.in .orders li,
+  .card.in .ranking li {
+    animation: none;
+  }
+}

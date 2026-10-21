@@ -6,21 +6,37 @@ import { getCategoryImage } from '../../utils/category-image.util';
 import { ProductForm } from '../product-form/product-form';
 import { ToastService } from '../../shared/toast.service';
 import { CopCurrencyPipe } from '../../shared/cop-currency.pipe';
+import { AuthService } from '../../services/auth.service';
+import { CartService } from '../../services/cart.service';
+import { CategoryService } from '../../services/category.service';
+import { Category } from '../../models/category.model';
+import { RevealDirective } from '../../shared/reveal.directive';
+import { TiltDirective } from '../../shared/tilt.directive';
+import { Carousel3d } from '../../shared/carousel3d';
+import { flyToBag } from '../../utils/fly-to-bag.util';
 
 @Component({
-  imports: [RouterLink, ProductForm, CopCurrencyPipe],
+  selector: 'app-product-list',
+  imports: [RouterLink, ProductForm, CopCurrencyPipe, RevealDirective, TiltDirective, Carousel3d],
   styleUrl: './product-list.css',
   templateUrl: './product-list.html',
 })
 export class ProductList implements OnInit {
   private productService = inject(ProductService);
   private toastService = inject(ToastService);
+  protected authService = inject(AuthService);
+  protected cartService = inject(CartService);
+  private categoryService = inject(CategoryService);
 
-  // Query params que llegan al navegar desde una categoría (ver CategoryList.verProductos).
+  // Query params que llegan al navegar desde una categoría (ver las tarjetas de CategoryList).
   categoryId = input<number, string>(undefined as any, { transform: numberAttribute });
   categoryName = input<string>();
 
   products = signal<Product[]>([]);
+  // Solo alimenta los filtros; si falla, la página sigue funcionando sin ellos.
+  categories = signal<Category[]>([]);
+  // Id de la pieza recién añadida: su botón muestra "Añadida ✓" un momento.
+  agregado = signal<number | null>(null);
   cargando = signal(true);
   error = signal<string | null>(null);
   productoAEliminar = signal<number | null>(null);
@@ -35,6 +51,10 @@ export class ProductList implements OnInit {
 
   ngOnInit(): void {
     this.cargarProductos();
+    this.categoryService.getCategories().subscribe({
+      next: (response) => this.categories.set(response.data),
+      error: () => this.categories.set([]),
+    });
   }
 
   cargarProductos(): void {
@@ -48,6 +68,18 @@ export class ProductList implements OnInit {
         this.cargando.set(false);
       }
     });
+  }
+
+  // La foto vuela a la bolsa del nav y, al llegar, se abre el carrito
+  // (que ya muestra la pieza, así que no hace falta un aviso aparte).
+  agregarAlCarrito(product: Product, event?: Event): void {
+    const frame = (event?.currentTarget as HTMLElement | null)?.closest('figure');
+    this.cartService.agregar(product, 1, false);
+    this.agregado.set(product.id);
+    flyToBag(frame).then(() => this.cartService.abrir());
+    setTimeout(() => {
+      if (this.agregado() === product.id) this.agregado.set(null);
+    }, 1800);
   }
 
   abrirFormulario(): void {
@@ -78,7 +110,7 @@ export class ProductList implements OnInit {
       next: () => {
         this.products.update(lista => lista.filter(p => p.id !== id));
         this.productoAEliminar.set(null);
-        this.toastService.success('Producto eliminado correctamente');
+        this.toastService.success('Pieza eliminada del catálogo');
       },
       error: (err) => {
         this.toastService.error(err.message);

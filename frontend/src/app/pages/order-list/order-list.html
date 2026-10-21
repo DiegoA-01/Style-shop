@@ -1,0 +1,33 @@
+@if (cargando()) {
+  <p class="glass-message">Cargando pedidos...</p>
+} @else if (error()) {
+  <p class="glass-message error">{{ error() }}</p>
+} @else if (orders().length === 0) {
+  <p class="glass-message">Todavía no hay pedidos.</p>
+} @else {
+  <div class="order-cards">
+    @for (order of orders(); track order.id) {
+      <div class="glass-card order-card">
+        <div class="order-summary" role="button" tabindex="0" (click)="alternarDetalle(order.id)" (keydown.enter)="alternarDetalle(order.id)">
+          <div>
+            <p class="order-id">Pedido #{{ order.id }}</p>
+            <p class="order-customer">{{ order.customerName }} · {{ order.customerPhone }}</p>
+            <p class="order-date">{{ order.createdAt | date: 'medium' }}</p>
+          </div>
+          <p class="order-total">{{ order.total | copCurrency }}</p>
+        </div>
+
+        @if (pedidoExpandido() === order.id) {
+          <ul class="order-items">
+            @for (item of order.items; track item.productId) {
+              <li>
+                <span>{{ item.quantity }}x {{ item.productName }}</span>
+                <span>{{ item.subtotal | copCurrency }}</span>
+              </li>
+            }
+          </ul>
+        }
+      </div>
+    }
+  </div>
+}

@@ -1,298 +1,294 @@
-.filter-bar {
+:host {
+  display: block;
+}
+
+.coleccion {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: clamp(1.5rem, 5vh, 3.5rem) clamp(0.25rem, 2vw, 2rem) clamp(4rem, 10vh, 7rem);
+}
+
+/* ── Encabezado editorial ── */
+.col-head {
   display: flex;
-  flex-wrap: wrap;
-  align-items: center;
   justify-content: space-between;
-  gap: 0.75rem;
-  margin-bottom: 1.5rem;
-  padding: 0.85rem 1.25rem;
-  color: var(--color-text);
-  background: var(--color-surface);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-md);
+  align-items: flex-end;
+  flex-wrap: wrap;
+  gap: 1.5rem;
+  padding-bottom: 2rem;
+  border-bottom: 1px solid var(--line);
 }
 
-.filter-bar .clear-filter {
-  color: var(--color-accent);
+.col-head .display {
+  margin-top: 1rem;
+  font-size: clamp(1.8rem, 4.4vw, 3.8rem);
+}
+
+/* ── Filtros por categoría ── */
+.chips {
+  display: flex;
+  gap: 0.5rem;
+  margin: 1.6rem 0 clamp(2.5rem, 7vh, 4.5rem);
+  overflow-x: auto;
+  scrollbar-width: none;
+  padding-bottom: 0.2rem;
+}
+
+.chip {
+  flex-shrink: 0;
+  padding: 0.6rem 1.1rem;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  color: var(--text-secondary);
+  font-family: var(--f-mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
   text-decoration: none;
-  font-weight: 600;
+  transition: border-color 300ms var(--ease-out), color 300ms var(--ease-out), background-color 300ms var(--ease-out);
 }
 
-.filter-bar .clear-filter:hover {
-  text-decoration: underline;
+.chip:hover {
+  border-color: var(--line-strong);
+  color: var(--text-primary);
 }
 
-.product-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(min(100%, 280px), 360px));
-  justify-content: start;
-  gap: 2rem;
+.chip.on {
+  border-color: var(--accent);
+  color: var(--accent);
 }
 
-.glass-card {
-  background: var(--color-surface);
-  color: var(--color-text);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-md);
+@media (pointer: coarse) {
+  .chip {
+    min-height: 44px;
+    display: inline-flex;
+    align-items: center;
+  }
+}
+
+/* ── Piezas en coverflow 3D (app-carousel3d) ── */
+app-carousel3d {
+  --w: 320px;
+  --h: 580px;
+  margin-top: 1rem;
+}
+
+.card {
+  display: flex;
+  flex-direction: column;
+  height: 540px;
+  padding: 10px;
+  border-radius: var(--r-card);
+}
+
+.card-img {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+  margin: 0;
+  border-radius: var(--r-inner);
   overflow: hidden;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
-  transition: transform var(--duration) var(--ease), border-color var(--duration) var(--ease);
-  animation: rise-in var(--duration) var(--ease) backwards;
+  background: var(--studio);
+  isolation: isolate;
 }
 
-.glass-card:hover {
-  transform: translateY(-3px);
-  border-color: var(--color-border);
-}
-
-/* Entrada escalonada: cada tarjeta aparece un poco después que la anterior
-   en vez de aparecer todas de golpe (heurística: estética minimalista y feedback suave). */
-.product-grid > .glass-card:nth-child(1) { animation-delay: 0ms; }
-.product-grid > .glass-card:nth-child(2) { animation-delay: 40ms; }
-.product-grid > .glass-card:nth-child(3) { animation-delay: 80ms; }
-.product-grid > .glass-card:nth-child(4) { animation-delay: 120ms; }
-.product-grid > .glass-card:nth-child(5) { animation-delay: 160ms; }
-.product-grid > .glass-card:nth-child(6) { animation-delay: 200ms; }
-.product-grid > .glass-card:nth-child(n + 7) { animation-delay: 240ms; }
-
-.product-image {
+.card-img img {
+  position: absolute;
+  inset: 0;
   width: 100%;
-  height: 210px;
+  height: 100%;
+  display: block;
   object-fit: contain;
-  background: rgba(255, 255, 255, 0.12);
+  padding: 12%;
+  /* El fondo casi blanco de la foto se lleva a blanco y el multiply lo funde
+     con el estudio: el producto queda flotando. */
+  mix-blend-mode: multiply;
+  filter: var(--studio-filter);
+  transition: transform 900ms var(--ease-out);
+  pointer-events: none;
 }
 
-.card-content {
-  padding: 1.35rem;
+.slot.front .card-img img {
+  transform: scale(1.04);
 }
 
-.card-content h3 {
-  margin-bottom: 0.65rem;
-  font-size: 1.25rem;
+/* Añadir a la bolsa: sube con rebote cuando la pieza llega al frente. */
+.quick-add {
+  position: absolute;
+  left: 0.7rem;
+  right: 0.7rem;
+  bottom: 0.7rem;
+  z-index: 2;
+  transform: translateY(140%);
+  transition: transform 550ms var(--ease-spring), box-shadow 400ms var(--ease-out);
 }
 
-.category-tag {
-  display: inline-block;
-  background: rgba(255, 255, 255, 0.4);
-  border-radius: 12px;
-  padding: 2px 10px;
-  font-size: 0.8rem;
-  margin: 0.25rem 0;
+.slot.front .quick-add {
+  transform: translate(var(--pull-x), calc(var(--pull-y) + var(--lift))) scale(var(--press));
+}
+
+.quick-add.done {
+  background: linear-gradient(135deg, rgba(120, 220, 150, 0.3), transparent 60%), #0e5c28;
+  border-color: rgba(150, 230, 170, 0.5);
+}
+
+.card-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding: 0.9rem 0.6rem 0.4rem;
+}
+
+.card-meta {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.card-info .display {
+  font-size: 1rem;
+  line-height: 1.25;
+  overflow-wrap: anywhere;
+}
+
+.cat-name {
+  margin: 0.25rem 0 0;
+  color: var(--text-secondary);
+  font-size: 0.82rem;
 }
 
 .price {
-  font-weight: 700;
-  font-size: 1.2rem;
+  margin: 0;
+  font-family: var(--f-mono);
+  font-size: 0.92rem;
+  white-space: nowrap;
 }
 
-.card-actions {
-  display: flex;
-  justify-content: space-between;
-  margin-top: 0.75rem;
+.stock-note {
+  margin: 0;
+  font-family: var(--f-mono);
+  font-size: 0.66rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--text-secondary);
 }
 
-.card-actions a {
-  padding: 0.4rem 0.75rem;
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-sm);
-  color: var(--color-text);
-  text-decoration: none;
-  font-size: 0.85rem;
-  font-weight: 600;
-  transition: transform var(--duration-fast) var(--ease), border-color var(--duration-fast) var(--ease),
-    color var(--duration-fast) var(--ease);
+.stock-note.low {
+  color: var(--accent);
 }
 
-.card-actions a:hover {
-  border-color: var(--color-accent);
-  color: var(--color-accent);
-  transform: translateY(-1px);
-}
-
-.card-actions button {
-  padding: 0.4rem 0.75rem;
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-sm);
-  background: transparent;
-  color: var(--color-text);
-  font: inherit;
-  font-size: 0.85rem;
-  cursor: pointer;
-  transition: transform var(--duration-fast) var(--ease), border-color var(--duration-fast) var(--ease),
-    color var(--duration-fast) var(--ease);
-}
-
-.card-actions button:hover {
-  border-color: var(--color-danger);
-  color: var(--color-danger);
-  transform: translateY(-1px);
-}
-
-.glass-message {
-  background: var(--color-surface);
-  border: 1px solid var(--color-border);
-  backdrop-filter: blur(10px);
-  border-radius: var(--radius-md);
-  padding: 1rem;
-  text-align: center;
-  animation: fade-in var(--duration) var(--ease);
-}
-
-.glass-button {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
-  margin-top: 1.5rem;
-  background: var(--color-accent);
-  border: 1px solid var(--color-accent);
-  border-radius: var(--radius-md);
-  padding: 0.65rem 1.25rem;
-  text-decoration: none;
-  color: #06201d;
-  font-weight: 600;
-  font: inherit;
-  cursor: pointer;
-  transition: transform var(--duration-fast) var(--ease);
-}
-
-.glass-button:hover {
-  transform: translateY(-1px);
-}
-
-.form-modal-backdrop {
-  position: fixed;
-  inset: 0;
-  z-index: 10;
-  display: grid;
-  place-items: center;
-  padding: 1rem;
-  overflow-y: auto;
-  background: rgba(0, 0, 0, 0.42);
-  backdrop-filter: blur(10px) saturate(120%);
-}
-
-.form-modal {
-  width: min(100%, 560px);
-  max-height: calc(100vh - 2rem);
-  overflow-y: auto;
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-lg);
-  background: rgba(18, 20, 26, 0.92);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.45);
-  animation: pop-in var(--duration) var(--ease);
-}
-
-.form-modal-header {
+.card-admin {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  padding: 1.1rem 1.25rem 0;
-  color: var(--color-text);
+  gap: 1.4rem;
+  padding-top: 0.6rem;
+  border-top: 1px solid var(--line);
 }
 
-.form-modal-header h2 {
-  margin: 0;
+.lux-state {
+  grid-column: 1 / -1;
 }
 
-.close-modal {
-  border: 0;
-  background: transparent;
-  color: var(--color-text-muted);
-  font-size: 1.8rem;
-  line-height: 1;
-  cursor: pointer;
-  transition: color var(--duration-fast) var(--ease);
+.lux-state .link-mono {
+  margin-left: 0.8rem;
 }
 
-.close-modal:hover {
-  color: var(--color-text);
+@media (max-width: 620px) {
+  app-carousel3d {
+    --w: 250px;
+    --h: 490px;
+  }
+
+  .card {
+    height: 450px;
+  }
 }
 
-.delete-modal-backdrop {
-  position: fixed;
-  inset: 0;
-  z-index: 10;
+/* ── Carga: siluetas que brillan suave ── */
+.skeleton .card-img,
+.skeleton .bar {
+  background: linear-gradient(100deg, var(--panel) 30%, #222224 50%, var(--panel) 70%);
+  background-size: 300% 100%;
+  animation: shimmer 1.8s ease-in-out infinite;
+}
+
+.skeleton .bar {
+  display: block;
+  height: 0.8rem;
+  border-radius: var(--r-card);
+}
+
+.skeleton .bar.short {
+  width: 40%;
+}
+
+@keyframes shimmer {
+  from { background-position: 100% 0; }
+  to { background-position: 0 0; }
+}
+
+/* ── Paneles: el título de la confirmación ── */
+.lux-panel.narrow .display {
+  margin-top: 1rem;
+  font-size: clamp(1.2rem, 2.6vw, 1.6rem);
+}
+
+@media (max-width: 1024px) {
+  .grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 560px) {
+  .grid {
+    grid-template-columns: 1fr;
+  }
+
+  .col-head {
+    align-items: flex-start;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .card-img img {
+    transform: none;
+  }
+
+  .curtain {
+    transform: scaleY(0);
+  }
+
+  .skeleton .card-img,
+  .skeleton .bar {
+    animation: none;
+  }
+}
+
+.grid {
   display: grid;
-  place-items: center;
-  padding: 1.5rem;
-  background: rgba(0, 0, 0, 0.58);
-  backdrop-filter: blur(5px);
-  animation: fade-in var(--duration-fast) var(--ease);
-}
-
-.delete-modal {
-  width: min(100%, 420px);
-  padding: 2rem;
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-lg);
-  background: rgba(20, 22, 28, 0.95);
-  color: var(--color-text);
-  text-align: center;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
-  animation: pop-in var(--duration) var(--ease);
-}
-
-.delete-modal-icon {
-  display: grid;
-  place-items: center;
-  width: 3rem;
-  height: 3rem;
-  margin: 0 auto 1rem;
-  border: 1px solid var(--color-danger);
-  border-radius: 50%;
-  background: rgba(244, 102, 74, 0.16);
-  color: var(--color-danger);
-  font-size: 1.6rem;
-  font-weight: 700;
-}
-
-.delete-modal h2 {
-  margin: 0 0 0.6rem;
-  font-size: 1.35rem;
-}
-
-.delete-modal p {
-  margin: 0;
-  color: var(--color-text-muted);
-}
-
-.delete-modal-actions {
-  display: flex;
+  grid-template-columns: repeat(3, minmax(0, 300px));
   justify-content: center;
-  gap: 0.8rem;
-  margin-top: 1.5rem;
+  gap: 1.5rem;
 }
 
-.delete-modal-actions button {
-  padding: 0.7rem 1.15rem;
-  border-radius: var(--radius-sm);
-  font: inherit;
-  font-weight: 600;
-  cursor: pointer;
-  transition: transform var(--duration-fast) var(--ease), background-color var(--duration-fast) var(--ease);
+.skeleton {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
 }
 
-.cancel-delete {
-  border: 1px solid var(--color-border);
-  background: transparent;
-  color: var(--color-text);
+.skeleton .card-img {
+  aspect-ratio: 4 / 5;
+  border-radius: var(--r-card);
 }
 
-.confirm-delete {
-  border: 1px solid var(--color-danger);
-  background: var(--color-danger);
-  color: #fff;
-}
+@media (max-width: 760px) {
+  .grid {
+    grid-template-columns: minmax(0, 300px);
+  }
 
-.cancel-delete:hover,
-.confirm-delete:hover {
-  transform: translateY(-1px);
-}
-
-.confirm-delete:hover {
-  background: var(--color-danger-strong);
+  .grid .skeleton:nth-child(n + 2) {
+    display: none;
+  }
 }

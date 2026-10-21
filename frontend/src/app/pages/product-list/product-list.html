@@ -1,53 +1,126 @@
-@if (categoryId()) {
-  <div class="filter-bar">
-    <span>Categoría: <strong>{{ categoryName() }}</strong></span>
-    <a routerLink="/products" class="clear-filter">Ver todos los productos</a>
-  </div>
-}
-
-@if (cargando()) {
-  <p class="glass-message">Cargando productos...</p>
-} @else if (error()) {
-  <p class="glass-message error">{{ error() }}</p>
-} @else {
-  <div class="product-grid">
-    @for (product of productosFiltrados(); track product.id) {
-      <div class="glass-card">
-        <!-- Primero se usa la imagen propia del producto; si no existe, se usa la de su categoría. -->
-        <img
-          [src]="product.imageUrl || getCategoryImage(product.category.name)"
-          (error)="onImageError($event, product.category.name)"
-          [alt]="product.name"
-          class="product-image"
-        >
-        <div class="card-content">
-          <h3>{{ product.name }}</h3>
-          <span class="category-tag">{{ product.category.name }}</span>
-          <p class="price">{{ product.price | copCurrency }}</p>
-          <p class="stock">Stock: {{ product.stock }}</p>
-          <div class="card-actions">
-            <a [routerLink]="['/products', product.id, 'edit']">Editar</a>
-            <button (click)="eliminar(product.id)">Eliminar</button>
-          </div>
-        </div>
-      </div>
-    } @empty {
-      @if (categoryId()) {
-        <p class="glass-message">No hay productos en esta categoría todavía.</p>
-      } @else {
-        <p class="glass-message">No hay productos todavía.</p>
-      }
+<section class="coleccion">
+  <header class="col-head" appReveal>
+    <div>
+      <p class="mono-label">
+        La colección
+        @if (!cargando() && !error()) {
+          · {{ productosFiltrados().length }} {{ productosFiltrados().length === 1 ? 'pieza' : 'piezas' }}
+        }
+      </p>
+      <h2 class="display">{{ categoryName() || 'Todas las piezas' }}</h2>
+    </div>
+    @if (authService.isStaff()) {
+      <button type="button" class="btn-line" (click)="abrirFormulario()">Nuevo producto</button>
     }
-  </div>
-}
-<button type="button" class="glass-button" (click)="abrirFormulario()">+ Nuevo producto</button>
+  </header>
+
+  <!-- Filtro por categoría: usa los mismos query params que las tarjetas de CategoryList. -->
+  @if (categories().length) {
+    <nav class="chips" aria-label="Filtrar por categoría" appReveal>
+      <a routerLink="/products" class="chip" [class.on]="!categoryId()" [attr.aria-current]="!categoryId() ? 'page' : null">Todas</a>
+      @for (category of categories(); track category.id) {
+        <a
+          routerLink="/products"
+          [queryParams]="{ categoryId: category.id, categoryName: category.name }"
+          class="chip"
+          [class.on]="categoryId() === category.id"
+          [attr.aria-current]="categoryId() === category.id ? 'page' : null"
+        >{{ category.name }}</a>
+      }
+    </nav>
+  }
+
+  @if (cargando()) {
+    <div class="grid" aria-busy="true" aria-label="Cargando la colección">
+      @for (n of [1, 2, 3, 4, 5, 6]; track n) {
+        <div class="card skeleton" aria-hidden="true">
+          <div class="card-img"></div>
+          <span class="bar short"></span>
+          <span class="bar"></span>
+        </div>
+      }
+    </div>
+  } @else if (error()) {
+    <p class="lux-state error">No pudimos cargar la colección. {{ error() }}</p>
+  } @else if (productosFiltrados().length) {
+    <app-carousel3d mode="flow" label="La colección" itemLabel="Pieza">
+      @for (product of productosFiltrados(); track product.id; let i = $index) {
+        <div class="slot">
+          <article class="card glass">
+            <figure class="card-img" appTilt>
+              <!-- Primero la imagen propia del producto; si no existe, la de su categoría. -->
+              <img
+                [src]="product.imageUrl || getCategoryImage(product.category.name)"
+                (error)="onImageError($event, product.category.name)"
+                [alt]="product.name"
+                draggable="false"
+                [attr.loading]="i < 4 ? 'eager' : 'lazy'"
+              >
+              <!-- El super admin ve el catálogo para administrarlo, no para comprar. -->
+              @if (!authService.isAdmin()) {
+                <button
+                  type="button"
+                  class="quick-add btn"
+                  [class.done]="agregado() === product.id"
+                  [disabled]="product.stock <= 0"
+                  (click)="agregarAlCarrito(product, $event)"
+                >
+                  @if (product.stock <= 0) {
+                    Agotado
+                  } @else if (agregado() === product.id) {
+                    Añadida ✓
+                  } @else {
+                    Añadir a la bolsa
+                  }
+                </button>
+              }
+            </figure>
+
+            <div class="card-info">
+              <div class="card-meta">
+                <div>
+                  <h3 class="display">{{ product.name }}</h3>
+                  <p class="cat-name">{{ product.category.name }}</p>
+                </div>
+                <p class="price">{{ product.price | copCurrency }}</p>
+              </div>
+              @if (product.stock <= 0) {
+                <p class="stock-note">Agotado</p>
+              } @else if (product.stock <= 3) {
+                <p class="stock-note low">Últimas {{ product.stock }}</p>
+              }
+              @if (authService.isStaff()) {
+                <div class="card-admin">
+                  <a class="link-mono" [routerLink]="['/products', product.id, 'edit']">Editar</a>
+                  <button type="button" class="link-mono danger" (click)="eliminar(product.id)">Eliminar</button>
+                </div>
+              }
+            </div>
+          </article>
+        </div>
+      }
+    </app-carousel3d>
+  } @else {
+    <p class="lux-state">
+      @if (categoryId()) {
+        Todavía no hay piezas en esta categoría.
+        <a class="link-mono" routerLink="/products">Ver todas</a>
+      } @else {
+        La colección llega pronto.
+      }
+    </p>
+  }
+</section>
 
 @if (mostrarFormulario()) {
-  <div class="form-modal-backdrop" (click)="cerrarFormulario()">
-    <section class="form-modal" role="dialog" aria-modal="true" aria-labelledby="new-product-title" (click)="$event.stopPropagation()">
-      <div class="form-modal-header">
-        <h2 id="new-product-title">Nuevo producto</h2>
-        <button type="button" class="close-modal" aria-label="Cerrar" (click)="cerrarFormulario()">&times;</button>
+  <div class="lux-backdrop" (click)="cerrarFormulario()">
+    <section class="lux-panel" role="dialog" aria-modal="true" aria-labelledby="new-product-title" (click)="$event.stopPropagation()">
+      <div class="lux-panel-head">
+        <div>
+          <p class="mono-label">Personal</p>
+          <h2 id="new-product-title" class="display">Nuevo producto</h2>
+        </div>
+        <button type="button" class="lux-close" aria-label="Cerrar" (click)="cerrarFormulario()">&times;</button>
       </div>
       <app-product-form [embedded]="true" (saved)="productoGuardado()" (closed)="cerrarFormulario()" />
     </section>
@@ -55,14 +128,14 @@
 }
 
 @if (productoAEliminar() !== null) {
-  <div class="delete-modal-backdrop" (click)="cancelarEliminacion()">
-    <section class="delete-modal" role="alertdialog" aria-modal="true" aria-labelledby="delete-product-title" (click)="$event.stopPropagation()">
-      <div class="delete-modal-icon">!</div>
-      <h2 id="delete-product-title">¿Eliminar producto?</h2>
-      <p>Esta acción no se puede deshacer.</p>
-      <div class="delete-modal-actions">
-        <button type="button" class="cancel-delete" (click)="cancelarEliminacion()">Cancelar</button>
-        <button type="button" class="confirm-delete" (click)="confirmarEliminacion()">Eliminar</button>
+  <div class="lux-backdrop" (click)="cancelarEliminacion()">
+    <section class="lux-panel narrow" role="alertdialog" aria-modal="true" aria-labelledby="delete-product-title" aria-describedby="delete-product-text" (click)="$event.stopPropagation()">
+      <p class="mono-label">Confirmar</p>
+      <h2 id="delete-product-title" class="display">¿Eliminar esta pieza?</h2>
+      <p id="delete-product-text" class="lux-panel-text">Sale del catálogo para siempre. Esta acción no se puede deshacer.</p>
+      <div class="lux-panel-actions">
+        <button type="button" class="btn-line" (click)="cancelarEliminacion()">Cancelar</button>
+        <button type="button" class="btn danger" (click)="confirmarEliminacion()">Eliminar</button>
       </div>
     </section>
   </div>

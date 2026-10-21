@@ -2,19 +2,23 @@ import { Component, HostListener, inject, signal, OnInit } from '@angular/core';
 import { CategoryService } from '../../services/category.service';
 import { Category } from '../../models/category.model';
 import { getCategoryImage } from '../../utils/category-image.util';
-import { Router, RouterLink } from '@angular/router';
+import { RouterLink } from '@angular/router';
 import { CategoryForm } from '../category-form/category-form';
 import { ToastService } from '../../shared/toast.service';
+import { AuthService } from '../../services/auth.service';
+import { RevealDirective } from '../../shared/reveal.directive';
+import { TiltDirective } from '../../shared/tilt.directive';
+import { Carousel3d } from '../../shared/carousel3d';
 
 @Component({
-  imports: [RouterLink, CategoryForm],
+  imports: [RouterLink, CategoryForm, RevealDirective, TiltDirective, Carousel3d],
   styleUrl: './category-list.css',
   templateUrl: './category-list.html',
 })
 export class CategoryList implements OnInit {
   private categoryService = inject(CategoryService);
   private toastService = inject(ToastService);
-  private router = inject(Router);
+  protected authService = inject(AuthService);
 
   categories = signal<Category[]>([]);
   cargando = signal(true);
@@ -67,7 +71,7 @@ export class CategoryList implements OnInit {
       next: () => {
         this.categories.update(lista => lista.filter(c => c.id !== id));
         this.categoriaAEliminar.set(null);
-        this.toastService.success('Categoría eliminada correctamente');
+        this.toastService.success('Categoría eliminada');
       },
       error: (err) => {
         this.toastService.error(err.message);
@@ -78,15 +82,6 @@ export class CategoryList implements OnInit {
 
   cancelarEliminacion(): void {
     this.categoriaAEliminar.set(null);
-  }
-
-  // Al hacer click en una categoría se navega al catálogo de productos ya
-  // filtrado por esa categoría (categoryName solo es para el título, evita
-  // pedirle la categoría de nuevo al backend en product-list).
-  verProductos(category: Category): void {
-    this.router.navigate(['/products'], {
-      queryParams: { categoryId: category.id, categoryName: category.name }
-    });
   }
 
   @HostListener('document:keydown.escape')
@@ -100,6 +95,30 @@ export class CategoryList implements OnInit {
 
   getCategoryImage(categoryName: string): string {
     return getCategoryImage(categoryName);
+  }
+
+  // Las fotos de producto con fondo blanco van "flotando" en el estudio; las
+  // fotos de ambiente (fondo oscuro o de color) llenan la tarjeta. Se decide
+  // mirando 8 puntos del borde: si la mayoría son claros, es fondo de estudio.
+  onImageLoad(event: Event): void {
+    const img = event.target as HTMLImageElement;
+    try {
+      const size = 16;
+      const canvas = document.createElement('canvas');
+      canvas.width = canvas.height = size;
+      const ctx = canvas.getContext('2d', { willReadFrequently: true });
+      if (!ctx) return;
+      ctx.drawImage(img, 0, 0, size, size);
+      const m = size - 1, h = Math.floor(size / 2);
+      const puntos = [[0, 0], [h, 0], [m, 0], [0, h], [m, h], [0, m], [h, m], [m, m]];
+      const claros = puntos.filter(([x, y]) => {
+        const [r, g, b] = ctx.getImageData(x, y, 1, 1).data;
+        return (r + g + b) / 3 > 215;
+      }).length;
+      img.classList.toggle('photo', claros < puntos.length / 2);
+    } catch {
+      // Imagen de otro origen sin permiso de lectura: se queda en el estudio.
+    }
   }
 
   // Si falta la foto asociada a la categoría, se muestra una imagen general.

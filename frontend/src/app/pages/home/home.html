@@ -1,0 +1,145 @@
+<div class="lux">
+  <!-- ── Portada: texto a un lado, anillo 3D de camisas al otro ── -->
+  <section class="hero" aria-labelledby="hero-title">
+    <div class="hero-copy">
+      <h1 id="hero-title" class="display" aria-label="Tu estilo, sin ruido.">
+        <span class="w" style="--i: 0" aria-hidden="true">Tu</span>
+        <span class="w" style="--i: 1" aria-hidden="true">estilo,</span>
+        <span class="w" style="--i: 2" aria-hidden="true">sin</span>
+        <span class="w" style="--i: 3" aria-hidden="true">ruido.</span>
+      </h1>
+      <p class="lede">Básicos elegidos uno por uno en Bogotá. Arrastra el anillo o déjalo girar.</p>
+      <div class="ctas">
+        <a class="btn" appMagnet href="#coleccion">Ver colección</a>
+        <a class="btn-line" appMagnet routerLink="/categories">Categorías</a>
+      </div>
+    </div>
+    <app-shirt-orbit />
+  </section>
+
+  <!-- ── La Maison ── -->
+  <section class="maison" id="nosotros" [class.sewn]="cosido()">
+    <div class="maison-mark" appReveal>
+      <svg class="mono" viewBox="0 0 200 200" aria-hidden="true">
+        <defs>
+          <mask id="stitch-mask" maskUnits="userSpaceOnUse">
+            <circle class="stitch-reveal" cx="100" cy="100" r="80" pathLength="1" transform="rotate(-90 100 100)" />
+          </mask>
+        </defs>
+        <circle class="draw ring" cx="100" cy="100" r="92" pathLength="1" />
+        <circle class="stitch" cx="100" cy="100" r="80" mask="url(#stitch-mask)" />
+        <path class="draw letter" pathLength="1" d="M62 52 L62 148 L88 148 C124 148 142 126 142 100 C142 74 124 52 88 52 Z" />
+        <path class="draw letter p" pathLength="1" d="M104 150 L104 64 L130 64 C150 64 160 74 160 88 C160 102 150 112 130 112 L104 112" />
+      </svg>
+      <button type="button" class="hold" [attr.aria-pressed]="cosido()">
+        <span class="hold-track" aria-hidden="true"></span>
+        {{ cosido() ? 'Hecho a conciencia' : 'Mantén presionado para coser' }}
+      </button>
+    </div>
+
+    <div class="maison-copy">
+      <p class="mono-label" appReveal>La Maison · Bogotá</p>
+      <h2 class="display" appReveal>Pocas prendas. Bien elegidas.</h2>
+      <ul class="stitched-lines">
+        <li>Elegimos cada pieza por cómo se siente, cuánto dura y cómo cae.</li>
+        <li>Básicos para todos los días y piezas que se notan sin gritar.</li>
+        <li>Precios justos y claros, sin letra pequeña.</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- ── La colección: vitrina editorial con los productos reales ── -->
+  <section class="vitrina" id="coleccion">
+    <header class="vitrina-head" appReveal>
+      <p class="mono-label">La colección</p>
+      <h2 class="display">Piezas de la temporada</h2>
+    </header>
+
+    @if (cargando()) {
+      <p class="state mono-label">Preparando la vitrina…</p>
+    } @else if (error()) {
+      <p class="state">{{ error() }}</p>
+    } @else if (products().length) {
+      <app-carousel3d mode="flow" label="Piezas de la temporada" itemLabel="Pieza">
+        @for (product of products(); track product.id) {
+          <div class="slot">
+            <article class="p3d glass">
+              <figure class="p3d-photo" appTilt>
+                <img
+                  [src]="product.imageUrl || getCategoryImage(product.category.name)"
+                  (error)="onImageError($event, product.category.name)"
+                  [alt]="product.name"
+                  draggable="false"
+                />
+              </figure>
+              <div class="p3d-meta">
+                <div>
+                  <h3 class="display">{{ product.name }}</h3>
+                  <small>{{ product.category.name }}</small>
+                </div>
+                <span class="p3d-price">{{ product.price | copCurrency }}</span>
+              </div>
+              <button type="button" class="btn p3d-add" [class.done]="agregado() === product.id" [disabled]="product.stock <= 0" (click)="agregar(product, $event)">
+                @if (product.stock <= 0) {
+                  Agotado
+                } @else if (agregado() === product.id) {
+                  Añadida ✓
+                } @else {
+                  Añadir a la bolsa
+                }
+              </button>
+            </article>
+          </div>
+        }
+      </app-carousel3d>
+    } @else {
+      <p class="state">La colección llega pronto.</p>
+    }
+  </section>
+
+  <!-- ── La tienda ── -->
+  <section class="tienda" id="ubicacion">
+    <div class="map" appReveal>
+      <iframe
+        src="https://www.google.com/maps?q=Cra.+45+%2326-85,+Bogot%C3%A1,+Colombia&output=embed"
+        title="Ubicación de Style Shop"
+        loading="lazy"
+        referrerpolicy="no-referrer-when-upgrade"
+        allowfullscreen
+      ></iframe>
+    </div>
+    <div class="tienda-card" appReveal>
+      <p class="mono-label">La tienda</p>
+      <h2 class="display">Ven a verla en persona.</h2>
+      <dl>
+        <div><dt class="mono-label">Dirección</dt><dd>Cra. 45 #26-85, Bogotá</dd></div>
+        <div><dt class="mono-label">Horario</dt><dd>Lunes a sábado, 9:00 a. m. a 7:00 p. m.</dd></div>
+        <div><dt class="mono-label">Contacto</dt><dd><a href="mailto:contacto@styleshop.com">contacto&#64;styleshop.com</a></dd></div>
+      </dl>
+    </div>
+  </section>
+
+  <!-- ── Cierre con la única llamada a la acción ── -->
+  <section class="closing" appReveal>
+    <svg class="thread" viewBox="0 0 1200 60" preserveAspectRatio="none" aria-hidden="true">
+      <path class="draw" pathLength="1" d="M0 30 C200 5 400 55 600 30 S1000 5 1200 30" />
+    </svg>
+    <h2 class="display">La colección te espera.</h2>
+    <a class="btn" routerLink="/products">Ver colección</a>
+  </section>
+
+  <footer class="lux-footer">
+    <p class="brand-line display">Style Shop</p>
+    <details>
+      <summary class="mono-label">Términos y condiciones</summary>
+      <ol>
+        <li>Los precios están en pesos colombianos (COP) y pueden cambiar sin previo aviso.</li>
+        <li>La disponibilidad se actualiza en tiempo real; un producto puede agotarse entre que lo ves y concretas la compra.</li>
+        <li>Las fotografías son de referencia: el color o los detalles del producto físico pueden variar levemente.</li>
+        <li>Al crear una cuenta te comprometes a dar información veraz y a proteger tu contraseña.</li>
+        <li>Style Shop puede actualizar estos términos en cualquier momento; los cambios se verán en esta misma página.</li>
+      </ol>
+    </details>
+    <p class="mono-label copy">© 2026 Style Shop · Bogotá</p>
+  </footer>
+</div>

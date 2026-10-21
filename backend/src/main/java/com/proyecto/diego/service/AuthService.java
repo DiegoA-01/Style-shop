@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 import com.proyecto.diego.dto.Request.LoginRequestDTO;
 import com.proyecto.diego.dto.Request.RegisterRequestDTO;
 import com.proyecto.diego.dto.Response.AuthResponseDTO;
+import com.proyecto.diego.entity.Role;
 import com.proyecto.diego.entity.User;
 import com.proyecto.diego.repository.UserRepository;
 import com.proyecto.diego.security.JwtService;
@@ -23,6 +24,9 @@ public class AuthService {
     private final AuthenticationManager authenticationManager;
     private final JwtService jwtService;
 
+    // Registro público: siempre crea la cuenta con rol USUARIO (sin permisos
+    // de administrar catálogo). Las cuentas TRABAJADOR o SUPER_ADMIN solo las
+    // crea un SUPER_ADMIN ya existente desde /users.
     public AuthResponseDTO register(RegisterRequestDTO request) {
         if (userRepository.existsByUsername(request.getUsername())) {
             throw new RuntimeException("El nombre de usuario ya existe");
@@ -36,6 +40,7 @@ public class AuthService {
         user.setUsername(request.getUsername());
         user.setEmail(request.getEmail());
         user.setPassword(passwordEncoder.encode(request.getPassword()));
+        user.setRole(Role.USUARIO);
 
         userRepository.save(user);
 
@@ -44,6 +49,7 @@ public class AuthService {
         return AuthResponseDTO.builder()
                 .token(token)
                 .username(user.getUsername())
+                .role(user.getRole().name())
                 .build();
     }
 
@@ -53,11 +59,15 @@ public class AuthService {
                 new UsernamePasswordAuthenticationToken(request.getUsername(), request.getPassword())
         );
 
-        String token = jwtService.generateToken(request.getUsername());
+        User user = userRepository.findByUsername(request.getUsername())
+                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+
+        String token = jwtService.generateToken(user.getUsername());
 
         return AuthResponseDTO.builder()
                 .token(token)
-                .username(request.getUsername())
+                .username(user.getUsername())
+                .role(user.getRole().name())
                 .build();
     }
 }

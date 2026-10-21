@@ -50,7 +50,7 @@ public class GlobalExceptionHandler {
             return HttpStatus.NOT_FOUND; //404
         }
 
-        if (msg.contains("ya existe") || msg.contains("no se puede eliminar")) {
+        if (msg.contains("ya existe") || msg.contains("no se puede eliminar") || msg.contains("ya fue")) {
             return HttpStatus.CONFLICT; //409
         }
 

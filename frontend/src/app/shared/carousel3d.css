@@ -1,0 +1,110 @@
+/* Sin encapsulación (ver carousel3d.ts): todo va bajo app-carousel3d. */
+app-carousel3d {
+  --w: 300px;
+  --h: 540px;
+  position: relative;
+  display: block;
+  min-width: 0;
+}
+
+app-carousel3d .c3d-stage {
+  position: relative;
+  height: var(--h);
+  perspective: 1600px;
+  perspective-origin: 50% 45%;
+  touch-action: pan-y;
+  cursor: grab;
+  user-select: none;
+  outline: none;
+}
+
+app-carousel3d .c3d-stage:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 6px;
+  border-radius: var(--r-card);
+}
+
+app-carousel3d .c3d-stage.dragging {
+  cursor: grabbing;
+}
+
+app-carousel3d .c3d-track {
+  position: absolute;
+  inset: 0;
+  transform-style: preserve-3d;
+}
+
+app-carousel3d .slot {
+  position: absolute;
+  left: 50%;
+  top: 0;
+  width: var(--w);
+  margin-left: calc(var(--w) / -2);
+  transform-style: preserve-3d;
+  will-change: transform, opacity;
+}
+
+/* Oscurece las tarjetas según su profundidad (opacidad desde el componente). */
+app-carousel3d .slot-shade {
+  position: absolute;
+  inset: 0;
+  z-index: 5;
+  border-radius: var(--r-card);
+  background: var(--canvas);
+  opacity: var(--shade, 0);
+  pointer-events: none;
+}
+
+/* Piso de luz bajo las tarjetas. */
+app-carousel3d .c3d-floor {
+  position: absolute;
+  left: 10%;
+  right: 10%;
+  bottom: -16px;
+  height: 90px;
+  border-radius: 50%;
+  background: radial-gradient(ellipse at 50% 50%, rgba(229, 56, 59, 0.3), rgba(229, 56, 59, 0.05) 55%, transparent 72%);
+  filter: blur(6px);
+  transform: rotateX(70deg);
+  animation: c3d-floor 5s ease-in-out infinite alternate;
+  pointer-events: none;
+}
+
+@keyframes c3d-floor {
+  to { opacity: 0.55; transform: rotateX(70deg) scale(1.08); }
+}
+
+app-carousel3d .c3d-ui {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  margin-top: 1.4rem;
+}
+
+app-carousel3d .c3d-ui svg {
+  width: 1.1rem;
+  height: 1.1rem;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+app-carousel3d .c3d-count {
+  min-width: 8.5rem;
+  padding: 0.6rem 1rem;
+  border-radius: 999px;
+  text-align: center;
+  font-family: var(--f-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  app-carousel3d .c3d-floor {
+    animation: none;
+  }
+}

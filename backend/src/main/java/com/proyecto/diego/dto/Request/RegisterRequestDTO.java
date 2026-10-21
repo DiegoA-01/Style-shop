@@ -8,6 +8,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+// Registro público: siempre crea una cuenta TRABAJADOR (ver AuthService.register).
+// No lleva campo "role" a propósito, para que nadie pueda pedir SUPER_ADMIN desde aquí.
 @Data
 @NoArgsConstructor
 @AllArgsConstructor

@@ -1,0 +1,81 @@
+:host {
+  display: block;
+}
+
+.form-error {
+  margin: 0 0 1.5rem;
+  padding: 0.9rem 1.1rem;
+  border-left: 2px solid var(--color-danger);
+  background: rgba(232, 115, 94, 0.08);
+  color: #ffb4a8;
+  font-size: 0.92rem;
+}
+
+/* ── Rol: tres opciones con lo que cada una puede hacer ── */
+.roles {
+  display: grid;
+  gap: 0.6rem;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.roles legend {
+  margin-bottom: 0.7rem;
+}
+
+.lux-form .role-option {
+  position: relative;
+  display: grid;
+  grid-template-columns: auto 1fr;
+  column-gap: 0.8rem;
+  row-gap: 0.2rem;
+  padding: 0.9rem 1rem;
+  border: 1px solid var(--line);
+  border-radius: var(--r-card);
+  cursor: pointer;
+  font-family: var(--f-body);
+  font-size: 0.95rem;
+  letter-spacing: normal;
+  text-transform: none;
+  color: var(--text-primary);
+  transition: border-color 300ms var(--ease-out), background-color 300ms var(--ease-out);
+}
+
+.lux-form .role-option:hover {
+  border-color: var(--line-strong);
+}
+
+.lux-form .role-option.on {
+  border-color: var(--accent);
+  background: rgba(229, 56, 59, 0.06);
+}
+
+.role-option input {
+  grid-row: span 2;
+  margin: 0.2rem 0 0;
+  accent-color: var(--accent);
+}
+
+.role-name {
+  font-weight: 600;
+}
+
+.role-desc {
+  color: var(--text-secondary);
+  font-size: 0.85rem;
+}
+
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  gap: 0.8rem;
+  margin-top: 0.6rem;
+}
+
+@media (max-width: 480px) {
+  .form-actions > * {
+    flex: 1;
+  }
+}

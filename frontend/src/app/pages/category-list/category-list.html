@@ -1,50 +1,93 @@
-@if (cargando()) {
-  <p class="glass-message">Cargando categorías...</p>
-} @else if (error()) {
-  <p class="glass-message error">{{ error() }}</p>
-} @else {
-  <div class="category-grid">
-    @for (category of categories(); track category.id) {
-      <div
-        class="glass-card category-card"
-        role="button"
-        tabindex="0"
-        [attr.aria-label]="'Ver productos de ' + category.name"
-        (click)="verProductos(category)"
-        (keydown.enter)="verProductos(category)"
-      >
-        <!-- La utilidad transforma el nombre de la categoría en /images/categories/*.jpg. -->
-        <img
-          [src]="getCategoryImage(category.name)"
-          (error)="onImageError($event)"
-          [alt]="category.name"
-          class="category-image"
-        >
-        <div class="card-content">
-          <h3>{{ category.name }}</h3>
-          @if (category.description) {
-            <p>{{ category.description }}</p>
-          }
-          <div class="card-actions" (click)="$event.stopPropagation()">
-            <a [routerLink]="['/categories', category.id, 'edit']">Editar</a>
-            <button (click)="eliminar(category.id)">Eliminar</button>
-          </div>
-        </div>
-      </div>
-    } @empty {
-      <p class="glass-message">No hay categorías todavía.</p>
+<section class="catalogo">
+  <header class="cat-head" appReveal>
+    <div>
+      <p class="mono-label">
+        Categorías
+        @if (!cargando() && !error()) {
+          · {{ categories().length }}
+        }
+      </p>
+      <h2 class="display">Elige por dónde empezar</h2>
+    </div>
+    @if (authService.isStaff()) {
+      <button type="button" class="btn-line" (click)="abrirFormulario()">Nueva categoría</button>
     }
-  </div>
-}
+  </header>
 
-<button type="button" class="glass-button" (click)="abrirFormulario()">+ Nueva categoría</button>
+  @if (cargando()) {
+    <div class="tiles" aria-busy="true" aria-label="Cargando categorías">
+      @for (n of [1, 2, 3, 4]; track n) {
+        <div class="tile skeleton" aria-hidden="true">
+          <div class="tile-copy">
+            <span class="bar short"></span>
+            <span class="bar"></span>
+          </div>
+          <div class="tile-img"></div>
+        </div>
+      }
+    </div>
+  } @else if (error()) {
+    <p class="lux-state error">No pudimos cargar las categorías. {{ error() }}</p>
+  } @else {
+    @if (categories().length) {
+      <app-carousel3d mode="arc" start="middle" label="Categorías" itemLabel="Categoría">
+        @for (category of categories(); track category.id; let i = $index) {
+          <div class="slot">
+            <article class="cat glass">
+              <!-- Toda la tarjeta lleva al catálogo filtrado por esta categoría. -->
+              <a
+                class="cat-link"
+                routerLink="/products"
+                [queryParams]="{ categoryId: category.id, categoryName: category.name }"
+                [attr.aria-label]="'Ver piezas de ' + category.name"
+                draggable="false"
+              >
+                <figure class="cat-img" appTilt>
+                  <!-- La utilidad transforma el nombre de la categoría en /images/categories/*.jpg. -->
+                  <img
+                    [src]="getCategoryImage(category.name)"
+                    (load)="onImageLoad($event)"
+                    (error)="onImageError($event)"
+                    alt=""
+                    draggable="false"
+                  >
+                </figure>
+                <div class="cat-row">
+                  <div>
+                    <span class="cat-num">{{ (i + 1).toString().padStart(2, '0') }}</span>
+                    <h3 class="display">{{ category.name }}</h3>
+                    @if (category.description) {
+                      <p class="cat-desc">{{ category.description }}</p>
+                    }
+                  </div>
+                  <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 17L17 7M9 7h8v8" /></svg>
+                </div>
+              </a>
+              @if (authService.isStaff()) {
+                <div class="tile-admin">
+                  <a class="link-mono" [routerLink]="['/categories', category.id, 'edit']">Editar</a>
+                  <button type="button" class="link-mono danger" (click)="eliminar(category.id)">Eliminar</button>
+                </div>
+              }
+            </article>
+          </div>
+        }
+      </app-carousel3d>
+    } @else {
+      <p class="lux-state">Todavía no hay categorías.</p>
+    }
+  }
+</section>
 
 @if (mostrarFormulario()) {
-  <div class="form-modal-backdrop" (click)="cerrarFormulario()">
-    <section class="form-modal" role="dialog" aria-modal="true" aria-labelledby="new-category-title" (click)="$event.stopPropagation()">
-      <div class="form-modal-header">
-        <h2 id="new-category-title">Nueva categoría</h2>
-        <button type="button" class="close-modal" aria-label="Cerrar" (click)="cerrarFormulario()">&times;</button>
+  <div class="lux-backdrop" (click)="cerrarFormulario()">
+    <section class="lux-panel narrow-form" role="dialog" aria-modal="true" aria-labelledby="new-category-title" (click)="$event.stopPropagation()">
+      <div class="lux-panel-head">
+        <div>
+          <p class="mono-label">Personal</p>
+          <h2 id="new-category-title" class="display">Nueva categoría</h2>
+        </div>
+        <button type="button" class="lux-close" aria-label="Cerrar" (click)="cerrarFormulario()">&times;</button>
       </div>
       <app-category-form [embedded]="true" (saved)="categoriaGuardada()" (closed)="cerrarFormulario()" />
     </section>
@@ -52,14 +95,14 @@
 }
 
 @if (categoriaAEliminar() !== null) {
-  <div class="delete-modal-backdrop" (click)="cancelarEliminacion()">
-    <section class="delete-modal" role="alertdialog" aria-modal="true" aria-labelledby="delete-category-title" (click)="$event.stopPropagation()">
-      <div class="delete-modal-icon">!</div>
-      <h2 id="delete-category-title">¿Eliminar categoría?</h2>
-      <p>Esta acción no se puede deshacer.</p>
-      <div class="delete-modal-actions">
-        <button type="button" class="cancel-delete" (click)="cancelarEliminacion()">Cancelar</button>
-        <button type="button" class="confirm-delete" (click)="confirmarEliminacion()">Eliminar</button>
+  <div class="lux-backdrop" (click)="cancelarEliminacion()">
+    <section class="lux-panel narrow" role="alertdialog" aria-modal="true" aria-labelledby="delete-category-title" aria-describedby="delete-category-text" (click)="$event.stopPropagation()">
+      <p class="mono-label">Confirmar</p>
+      <h2 id="delete-category-title" class="display">¿Eliminar esta categoría?</h2>
+      <p id="delete-category-text" class="lux-panel-text">Deja de aparecer en el catálogo. Esta acción no se puede deshacer.</p>
+      <div class="lux-panel-actions">
+        <button type="button" class="btn-line" (click)="cancelarEliminacion()">Cancelar</button>
+        <button type="button" class="btn danger" (click)="confirmarEliminacion()">Eliminar</button>
       </div>
     </section>
   </div>
